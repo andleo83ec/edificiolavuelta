@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La Vuelta, de Puertas del Sol — Tu siguiente oportunidad está a la vuelta</title>
+<meta name="description" content="La Vuelta, un proyecto de Grupo León Vintimilla en alianza con Construlein León Iñiguez en Cuenca. Departamentos, plaza comercial y amenidades: todo lo que quieres, más cerca de lo que imaginas.">
+<meta property="og:title" content="La Vuelta, de Puertas del Sol">
+<meta property="og:description" content="Todo lo que quieres, más cerca de lo que imaginas. Muy pronto en Cuenca.">
+<meta property="og:image" content="https://edificiolavuelta.com/og.jpg">
+<meta property="og:url" content="https://edificiolavuelta.com">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#FAEDE1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%238C2628'/><text x='50' y='72' font-size='62' font-family='Arial' font-weight='700' fill='%23FAEDE1' text-anchor='middle'>V</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --crema:#FAEDE1; --crema-2:#F3E2D2; --vino:#8C2628; --vino-hondo:#6A1A1C;
+  --cielo:#529BC6; --bruma:#AEC5C9; --olivo:#55705A; --tinta:#131614; --gris:#5E5652;
+  --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --texto:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--crema)}
+body{margin:0;background:var(--crema);color:var(--tinta);font-family:var(--texto);font-size:1.0625rem;line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;height:auto;display:block}
+figure{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--cielo);outline-offset:3px;border-radius:4px}
+.envoltura{width:min(1160px,100% - 2.5rem);margin-inline:auto}
+
+/* titulares con la sombra desfasada del logo */
+.titular{font-family:var(--display);font-stretch:75%;font-variation-settings:"wdth" 75;font-weight:800;color:var(--vino);
+  line-height:.98;letter-spacing:-.01em;margin:0;text-shadow:.06em .045em 0 var(--bruma)}
+.estrellas{color:var(--cielo);letter-spacing:.35em;font-size:1rem;line-height:1;user-select:none}
+
+/* Portada */
+.portada{padding:1.1rem 0 0;text-align:center}
+.barra{display:flex;justify-content:space-between;align-items:center;gap:1rem;text-align:left}
+.barra .lugar{font-size:.9rem;color:var(--gris);line-height:1.25}
+.pildora{white-space:nowrap;font-weight:600;font-size:.92rem;text-decoration:none;color:var(--vino);box-shadow:inset 0 0 0 1.5px var(--vino);padding:.5rem 1rem;border-radius:999px}
+.pildora:hover{background:var(--vino);color:var(--crema)}
+.portada .logo{width:min(620px,92%);margin:clamp(2rem,6vw,3.5rem) auto 1.5rem}
+.portada h1{font-family:var(--display);font-weight:600;font-size:clamp(1.35rem,3.6vw,2.1rem);line-height:1.2;margin:0 auto 1.75rem;max-width:24ch}
+.acciones{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center}
+.boton{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;font:600 1rem/1 var(--texto);text-decoration:none;border:0;cursor:pointer;padding:1rem 1.45rem;border-radius:999px;background:var(--vino);color:var(--crema)}
+.boton:hover{background:var(--vino-hondo)}
+.boton svg{width:20px;height:20px;flex:none}
+.boton.suave{background:transparent;color:var(--vino);box-shadow:inset 0 0 0 1.5px var(--vino)}
+.boton.suave:hover{background:var(--crema-2)}
+.fachada{margin-top:clamp(2.5rem,6vw,4rem)}
+.fachada img{width:100%;height:clamp(320px,62vw,760px);object-fit:cover;object-position:50% 62%}
+.fachada figcaption{display:flex;justify-content:space-between;gap:1rem;padding:.8rem 0;font-size:.9rem;color:var(--gris)}
+@media (prefers-reduced-motion:no-preference){
+  .portada .logo,.portada h1,.portada .acciones{animation:entra .9s cubic-bezier(.2,.7,.2,1) both}
+  .portada h1{animation-delay:.12s}.portada .acciones{animation-delay:.24s}
+  @keyframes entra{from{opacity:0;transform:translateY(12px)}}
+}
+
+/* Concepto */
+.concepto{padding:clamp(4rem,10vw,7.5rem) 0}
+.concepto .rejilla{display:grid;gap:3rem;align-items:center}
+@media (min-width:880px){.concepto .rejilla{grid-template-columns:1.1fr .9fr;gap:4rem}}
+.concepto .titular{font-size:clamp(2.4rem,7vw,4.6rem);margin:1rem 0 2rem;max-width:13ch}
+.pasos{list-style:none;margin:0 0 2rem;padding:0;display:grid;gap:.3rem;font-family:var(--display);font-size:clamp(1.25rem,3vw,1.7rem);line-height:1.3}
+.pasos li:nth-child(2){padding-left:1.4em}.pasos li:nth-child(3){padding-left:2.8em}
+.concepto p{color:var(--gris);max-width:56ch;margin:0}
+.concepto .foto img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px}
+
+/* Barrio */
+.barrio{background:var(--vino);color:var(--crema);padding:clamp(4rem,9vw,7rem) 0}
+.barrio .titular{color:var(--crema);text-shadow:.06em .045em 0 var(--vino-hondo);font-size:clamp(2.1rem,5.6vw,3.8rem);max-width:17ch;margin:0 0 2.5rem}
+.momentos{list-style:none;margin:0 0 3rem;padding:0;border-top:2px solid var(--crema);max-width:720px}
+.momentos li{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:1rem 0;border-bottom:1px solid rgba(250,237,225,.3);font-family:var(--display);font-size:clamp(1.15rem,2.6vw,1.5rem)}
+.momentos li span:last-child{font-family:var(--texto);font-size:.95rem;font-weight:600;color:var(--bruma);white-space:nowrap}
+.plaza{display:grid;gap:1rem}
+.plaza img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px}
+.barrio .nota{margin:1.5rem 0 0;max-width:62ch;opacity:.9}
+
+/* Amenidades */
+.amenidades{padding:clamp(4rem,10vw,7.5rem) 0}
+.amenidades .cabeza{display:grid;gap:1rem;margin-bottom:2.5rem;max-width:60ch}
+.amenidades .titular{font-size:clamp(2.4rem,7vw,4.6rem)}
+.amenidades .cabeza p{margin:0;color:var(--gris)}
+.galeria{display:grid;gap:1.75rem 1.25rem}
+@media (min-width:760px){.galeria{grid-template-columns:1fr 1fr}.galeria .ancha{grid-column:1/-1}}
+.pieza{margin:0}
+.pieza button{all:unset;cursor:zoom-in;display:block;width:100%;border-radius:6px;overflow:hidden}
+.pieza button:focus-visible{outline:3px solid var(--cielo);outline-offset:3px}
+.pieza img{width:100%;aspect-ratio:3/2;object-fit:cover;transition:transform .5s ease}
+.pieza.ancha img{aspect-ratio:16/8}
+@media (hover:hover){.pieza button:hover img{transform:scale(1.025)}}
+.pieza figcaption{padding-top:.8rem;display:grid;gap:.15rem}
+.pieza strong{font-family:var(--display);font-size:1.3rem;font-weight:700;color:var(--vino)}
+.pieza span{color:var(--gris);font-size:.98rem}
+
+.extras{display:grid;gap:1rem;margin-top:1.75rem}
+.extra{display:flex;gap:1.1rem;align-items:center;padding:1.4rem 1.5rem;border-radius:6px;background:var(--crema-2);box-shadow:inset 0 0 0 1.5px rgba(140,38,40,.25)}
+.extra svg{width:44px;height:44px;flex:none;fill:none;stroke:var(--vino);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.extra div{display:grid;gap:.1rem}
+.extra strong{font-family:var(--display);font-size:1.3rem;font-weight:700;color:var(--vino)}
+.extra span{color:var(--gris);font-size:.98rem}
+dialog{border:0;padding:0;background:transparent;max-width:min(1400px,96vw);max-height:92vh}
+dialog::backdrop{background:rgba(19,22,20,.88)}
+dialog img{max-height:84vh;width:auto;margin:auto;border-radius:4px}
+dialog p{color:var(--crema);text-align:center;margin:.75rem 0 0;font-family:var(--display);font-size:1.15rem}
+dialog .cerrar{position:fixed;top:calc(1rem + env(safe-area-inset-top,0px));right:1rem;width:44px;height:44px;border-radius:50%;border:0;background:var(--crema);color:var(--tinta);font-size:1.6rem;line-height:1;cursor:pointer}
+
+/* Equipo */
+.equipo{background:var(--crema-2);padding:clamp(4rem,10vw,7.5rem) 0;text-align:center}
+.equipo .titular{font-size:clamp(2.2rem,6vw,4rem);margin-bottom:1.25rem}
+.intro-equipo{color:var(--gris);max-width:52ch;margin:0 auto clamp(2.5rem,6vw,3.5rem)}
+.creditos{display:inline-block;position:relative;padding:2.2rem 1rem 0;font-family:var(--texto);color:var(--tinta)}
+.creditos p{margin:0}
+.un-proyecto{position:absolute;left:-.5rem;top:1.6rem;transform:rotate(-18deg);transform-origin:left bottom;color:var(--vino);font-size:clamp(.75rem,2.4vw,.95rem);letter-spacing:.2em;text-transform:uppercase}
+.grupo{font-size:clamp(1.6rem,6vw,2.6rem);line-height:1.15;letter-spacing:.09em;text-transform:uppercase;font-weight:500}
+.rol{margin-top:.4rem!important;color:#B3AAA4;font-size:clamp(.72rem,2.3vw,.95rem);letter-spacing:.32em;text-transform:uppercase}
+.con{margin:2rem 0 1.4rem!important;color:var(--vino);letter-spacing:.2em;text-transform:uppercase;font-size:.95rem}
+.socio{font-size:clamp(1.8rem,6.6vw,2.8rem);font-weight:600;letter-spacing:.03em;text-transform:uppercase;line-height:1.1}
+.rol2{margin-top:.5rem!important;color:#9E958F;font-size:clamp(.95rem,2.8vw,1.2rem);font-weight:500;text-transform:uppercase}
+/* Registro */
+.registro{background:var(--vino);color:var(--crema);padding:clamp(4rem,9vw,7rem) 0}
+.registro .rejilla{display:grid;gap:2.5rem}
+@media (min-width:880px){.registro .rejilla{grid-template-columns:1fr 1fr;align-items:center}}
+.registro .titular{color:var(--crema);text-shadow:.06em .045em 0 var(--vino-hondo);font-size:clamp(2.4rem,6vw,4.2rem);max-width:12ch;margin:0 0 1rem}
+.registro .rejilla>div>p{margin:0;opacity:.9;max-width:44ch}
+form{display:grid;gap:1rem;background:var(--crema);color:var(--tinta);padding:1.6rem;border-radius:18px}
+label{display:grid;gap:.35rem;font-weight:600;font-size:.95rem}
+input,select{font:inherit;font-weight:400;padding:.85rem 1rem;border:1.5px solid #DCC8B8;border-radius:12px;background:#fff;color:var(--tinta);width:100%}
+input:focus,select:focus{border-color:var(--vino);outline:none;box-shadow:0 0 0 3px rgba(140,38,40,.18)}
+.aviso{font-size:.85rem;color:var(--gris);margin:0}
+.error{color:var(--vino);font-size:.9rem;font-weight:600;margin:0;min-height:1.2em}
+
+footer{padding:3rem 0 5.5rem;text-align:center;color:var(--gris);font-size:.9rem}
+footer .logo{width:200px;margin:0 auto 1.25rem}
+footer p{margin:.2rem 0}
+
+.flotante{position:fixed;right:1rem;bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:10;width:58px;height:58px;border-radius:50%;background:#25D366;color:#fff;display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.flotante svg{width:30px;height:30px}
+</style>
+</head>
+<body>
+
+<header class="portada">
+  <div class="envoltura barra">
+    <span class="lugar">Puertas del Sol, Cuenca</span>
+    <a class="pildora" href="#registro">Quiero información</a>
+  </div>
+  <div class="envoltura">
+    <img class="logo" src="logo.png" alt="La Vuelta, de Puertas del Sol" width="1480" height="872">
+    <h1>Tu siguiente oportunidad está a la vuelta.</h1>
+    <div class="acciones">
+      <a class="boton js-wa" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Escríbenos por WhatsApp</a>
+      <a class="boton suave" href="#amenidades">Ver amenidades</a>
+    </div>
+  </div>
+  <figure class="fachada">
+    <img src="fachada.webp" alt="Render de la fachada del edificio La Vuelta" width="2000" height="1500" fetchpriority="high">
+    <figcaption class="envoltura"><span>Fachada del edificio</span><span>Muy pronto</span></figcaption>
+  </figure>
+</header>
+
+<main>
+  <section class="concepto" id="concepto">
+    <div class="envoltura rejilla">
+      <div>
+        <div class="estrellas" aria-hidden="true">✱✱✱</div>
+        <h2 class="titular">Un lugar cobra sentido cuando la vida sucede en él.</h2>
+        <ul class="pasos">
+          <li>Personas que se encuentran.</li>
+          <li>Historias que empiezan.</li>
+          <li>Espacios que se convierten en parte de tu día a día.</li>
+        </ul>
+        <p>Estamos construyendo un lugar pensado para estar cerca de lo que importa. Un proyecto que nace para quienes buscan su propio espacio, pero también una oportunidad para seguir creciendo.</p>
+      </div>
+      <div class="foto"><img src="cafe.webp" alt="Dos personas en una mesa de café frente a un muro con el logo de La Vuelta" width="1192" height="1484" loading="lazy"></div>
+    </div>
+  </section>
+
+  <section class="barrio">
+    <div class="envoltura">
+      <h2 class="titular">¿Y si tu día a día pudiera estar más cerca de todo lo que disfrutas?</h2>
+      <ul class="momentos">
+        <li><span>Salir por un café</span><span>a la vuelta</span></li>
+        <li><span>Encontrarte con alguien</span><span>a la vuelta</span></li>
+        <li><span>Caminar por tu barrio</span><span>a la vuelta</span></li>
+      </ul>
+      <div class="plaza">
+        <img src="plaza-2.webp" alt="Render de los locales comerciales en planta baja con parqueadero de bicicletas" width="1600" height="949" loading="lazy">
+      </div>
+      <p class="nota">Una plaza comercial en planta baja, con espacios pensados para cafés, heladerías y panaderías. Más cercanía, más practicidad y más vida alrededor.</p>
+    </div>
+  </section>
+
+  <section class="amenidades" id="amenidades">
+    <div class="envoltura">
+      <div class="cabeza">
+        <div class="estrellas" aria-hidden="true">✱✱✱</div>
+        <h2 class="titular">Amenidades</h2>
+        <p>Espacios compartidos para disfrutar sin salir de casa. Toca cualquier imagen para verla completa.</p>
+      </div>
+      <div class="galeria">
+        <figure class="pieza ancha"><button type="button" data-src="bar.webp" aria-label="Ampliar: bar en la terraza"><img src="bar.webp" alt="Render del bar en la terraza al atardecer, con vista a las montañas" width="1450" height="1077" loading="lazy"></button>
+          <figcaption><strong>Bar en la terraza</strong><span>Atardeceres con vista a las montañas de Cuenca.</span></figcaption></figure>
+        <figure class="pieza"><button type="button" data-src="teppanyaki.webp" aria-label="Ampliar: zona teppanyaki"><img src="teppanyaki.webp" alt="Render de la zona teppanyaki con barra y mesas" width="1460" height="1034" loading="lazy"></button>
+          <figcaption><strong>Zona teppanyaki</strong><span>Cocina a la plancha para compartir con amigos.</span></figcaption></figure>
+        <figure class="pieza"><button type="button" data-src="lobby.webp" aria-label="Ampliar: lobby"><img src="lobby.webp" alt="Render del lobby con recepción y sala de espera" width="1500" height="1045" loading="lazy"></button>
+          <figcaption><strong>Lobby</strong><span>Una recepción cálida para recibirte cada día.</span></figcaption></figure>
+        <figure class="pieza"><button type="button" data-src="ninos.webp" aria-label="Ampliar: zona de niños"><img src="ninos.webp" alt="Render de la zona de juegos infantiles con columpios y resbaladera" width="1700" height="847" loading="lazy"></button>
+          <figcaption><strong>Zona de niños</strong><span>Juegos al aire libre, rodeados de jardín.</span></figcaption></figure>
+        <figure class="pieza"><button type="button" data-src="pet.webp" aria-label="Ampliar: zona pet friendly"><img src="pet.webp" alt="Render de la zona pet friendly con césped, ducha y rampa" width="1600" height="955" loading="lazy"></button>
+          <figcaption><strong>Zona pet friendly</strong><span>Un espacio para tu mascota, con ducha y área de juego.</span></figcaption></figure>
+        <figure class="pieza"><button type="button" data-src="coworking.webp" aria-label="Ampliar: coworking"><img src="coworking.webp" alt="Render del coworking en la terraza, con sala de reuniones y mesas al aire libre" width="1600" height="893" loading="lazy"></button>
+          <figcaption><strong>Coworking</strong><span>Sala de reuniones y terraza para trabajar con vista a las montañas.</span></figcaption></figure>
+        <figure class="pieza"><button type="button" data-src="plaza-1.webp" aria-label="Ampliar: plaza central"><img src="plaza-1.webp" alt="Render de la plaza central con árboles, mesas y locales comerciales" width="1600" height="947" loading="lazy"></button>
+          <figcaption><strong>Plaza central</strong><span>Un espacio abierto con árboles y mesas, para encontrarte con tus vecinos.</span></figcaption></figure>
+      </div>
+      <div class="extras">
+        <div class="extra">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 24h40M10 16v16M16 12v24M32 12v24M38 16v16"/></svg>
+          <div><strong>Gimnasio</strong><span>Para entrenar a pocos pasos de tu departamento.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="equipo">
+    <div class="envoltura">
+      <h2 class="titular">Quiénes lo hacen</h2>
+      <p class="intro-equipo">La Vuelta nace de la trayectoria de Grupo León Vintimilla en diseño y construcción en Cuenca, en alianza con Construlein León Iñiguez, para llevar juntos el proyecto de los planos a la realidad.</p>
+      <div class="creditos">
+        <p class="un-proyecto">Un proyecto de</p>
+        <p class="grupo">Grupo<br>León Vintimilla</p>
+        <p class="rol">Diseño y construcción</p>
+        <p class="con">en alianza con</p>
+        <p class="socio">Construlein</p>
+        <p class="rol2">León Iñiguez</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="registro" id="registro">
+    <div class="envoltura rejilla">
+      <div>
+        <h2 class="titular">Sé de los primeros en saber.</h2>
+        <p>Déjanos tus datos y te escribimos por WhatsApp con planos, precios y fecha de lanzamiento antes que a nadie.</p>
+      </div>
+      <form id="formulario" novalidate>
+        <label>Nombre
+          <input name="nombre" autocomplete="name" required placeholder="Tu nombre">
+        </label>
+        <label>¿Qué te interesa?
+          <select name="interes">
+            <option>Vivir en La Vuelta</option>
+            <option>Invertir</option>
+            <option>Local comercial</option>
+            <option>Solo quiero información</option>
+          </select>
+        </label>
+        <p class="error" id="error" role="alert"></p>
+        <button class="boton" type="submit"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Enviar por WhatsApp</button>
+        <p class="aviso">Se abrirá WhatsApp con tu mensaje listo para enviar.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="envoltura">
+    <img class="logo" src="logo.png" alt="La Vuelta, de Puertas del Sol" width="1480" height="872" loading="lazy">
+    <p>Un proyecto de Grupo León Vintimilla en alianza con Construlein León Iñiguez. Cuenca, Ecuador.</p>
+    <p>Imágenes referenciales. © <span id="anio"></span> edificiolavuelta.com</p>
+  </div>
+</footer>
+
+<a class="flotante js-wa" href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg></a>
+
+<dialog id="visor" aria-label="Imagen ampliada">
+  <button class="cerrar" type="button" aria-label="Cerrar">×</button>
+  <img alt="">
+  <p></p>
+</dialog>
+
+<script>
+  // Número de ventas: código de país + número, sin + ni espacios
+  const WHATSAPP = "593983347804";
+  const MENSAJE = "Hola, quiero información sobre La Vuelta.";
+  const wa = (t) => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
+  document.querySelectorAll(".js-wa").forEach(a => a.href = wa(MENSAJE));
+  document.getElementById("anio").textContent = new Date().getFullYear();
+
+  document.getElementById("formulario").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const f = e.target, nombre = f.nombre.value.trim(), err = document.getElementById("error");
+    if (!nombre) { err.textContent = "Escribe tu nombre para continuar."; f.nombre.focus(); return; }
+    err.textContent = "";
+    window.open(wa("Hola, soy " + nombre + ". Me interesa La Vuelta: " + f.interes.value.toLowerCase() + ". ¿Me pueden enviar información?"), "_blank");
+  });
+
+  const visor = document.getElementById("visor");
+  document.querySelectorAll(".pieza button").forEach(b => b.addEventListener("click", () => {
+    visor.querySelector("img").src = b.dataset.src;
+    visor.querySelector("img").alt = b.querySelector("img").alt;
+    visor.querySelector("p").textContent = b.closest("figure").querySelector("strong").textContent;
+    visor.showModal();
+  }));
+  visor.querySelector(".cerrar").addEventListener("click", () => visor.close());
+  visor.addEventListener("click", (e) => { if (e.target === visor) visor.close(); });
+</script>
+</body>
+</html>

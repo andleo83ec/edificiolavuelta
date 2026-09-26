@@ -248,7 +248,7 @@ $("#f").addEventListener("submit",e=>{
   L.push(`🕒 ${d.horario}`);
   if(d.comentario) L.push(`💬 ${d.comentario}`);
   const cot = "https://edificiolavuelta.com/cotizador/?" + new URLSearchParams({nombre:d.nombre, cel:d.celular, correo:d.correo});
-L.push("", 🧾 Cotizar: ${cot});
+  L.push("", "🧾 Cotizar: " + cot);
   L.push("", `_${d.fecha}_`);
   window.location.href=`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(L.join("\n"))}`;
   e.target.reset(); toast("Registro guardado. Abriendo WhatsApp…");

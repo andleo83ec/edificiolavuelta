@@ -32,6 +32,12 @@ button{font:bold 15px Arial,Helvetica,sans-serif;border:0;border-radius:10px;pad
 .primario{background:var(--vino);color:var(--crema)}
 .secundario{background:var(--celeste);color:#fff}
 button:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+.modal{position:fixed;inset:0;background:rgba(59,43,43,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+.modal[hidden]{display:none}
+.modal-caja{background:var(--crema);border-radius:14px;padding:20px;max-width:340px;width:100%;display:flex;flex-direction:column;gap:10px;text-align:center;font-size:15px}
+.modal-caja p{margin:0}
+.enlace{background:none;color:var(--gris);font-weight:normal}
+button:disabled{opacity:.6}
 .aviso{font-size:12px;color:var(--gris);margin:4px 0 0}
 
 /* ---------- Vista previa ---------- */
@@ -246,6 +252,16 @@ button:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
   </div>
 </div>
 
+<div class="modal" id="modal" hidden>
+  <div class="modal-caja">
+    <p><b>El PDF está listo.</b></p>
+    <p>Toca <b>Compartir PDF</b> y elige WhatsApp y el chat del cliente.</p>
+    <button class="primario" id="mCompartir" type="button">Compartir PDF</button>
+    <button class="secundario" id="mChat" type="button">Abrir chat del cliente</button>
+    <button class="enlace" id="mCerrar" type="button">Cerrar</button>
+  </div>
+</div>
+
 <div class="acciones">
   <button class="secundario" id="btnWa" type="button">Enviar por WhatsApp</button>
   <button class="primario" id="btnPdf" type="button">Descargar PDF</button>
@@ -350,19 +366,92 @@ window.addEventListener("resize",escalar);
 document.addEventListener("input",e=>{ if(guardables.includes(e.target.id)) guardarAsesor(); render(); });
 $("#piso").addEventListener("change",()=>{ llenarUnidades(); render(); });
 $("#unidad").addEventListener("change",render);
-$("#btnPdf").addEventListener("click",()=>{
-  if(!$("#cNombre").value.trim()){ $("#cNombre").focus(); alert("Escribe el nombre del cliente antes de descargar."); return; }
-  const n=$("#cNombre").value.trim().split(/\s+/).slice(0,2).join("_");
-  const t=document.title; document.title=`Cotizacion_LaVuelta_${$("#unidad").value}_${n}`;
-  window.print(); setTimeout(()=>document.title=t,1000);
-});
-$("#btnWa").addEventListener("click",()=>{
-  const u=actual(); if(!u) return;
+/* ---------- PDF real (2 hojas A4) para descargar o compartir ---------- */
+let PDF=null;                       // se invalida cada vez que cambia algo
+const invalidar=()=>{ PDF=null; };
+document.addEventListener("input",invalidar);
+document.addEventListener("change",invalidar);
+
+function cargarScript(src){
+  return new Promise((ok,err)=>{ const s=document.createElement("script"); s.src=src; s.onload=ok;
+    s.onerror=()=>err(new Error("No se pudo cargar "+src)); document.head.appendChild(s); });
+}
+async function librerias(){
+  if(!window.html2canvas) await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+  if(!window.jspdf) await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+}
+function nombreArchivo(){
+  const n=$("#cNombre").value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/\s+/).slice(0,2).join("_").replace(/[^\w]/g,"");
+  return `Cotizacion_LaVuelta_${$("#unidad").value}_${n||"cliente"}.pdf`;
+}
+async function generarPDF(){
+  if(PDF) return PDF;
+  await librerias();
+  const cont=document.createElement("div");
+  cont.style.cssText="position:fixed;left:-10000px;top:0;width:794px;";
+  document.querySelectorAll(".hoja").forEach(h=>{ const c=h.cloneNode(true);
+    c.style.height="1123px"; c.style.boxShadow="none"; c.style.margin="0"; cont.appendChild(c); });
+  document.body.appendChild(cont);
+  await Promise.all([...cont.querySelectorAll("img")].map(i=>i.complete&&i.naturalWidth?0:new Promise(r=>{i.onload=i.onerror=r;})));
+  try{
+    const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true});
+    const hojas=[...cont.children];
+    for(let k=0;k<hojas.length;k++){
+      const cv=await html2canvas(hojas[k],{scale:2,backgroundColor:"#faede1",logging:false});
+      if(k) pdf.addPage();
+      pdf.addImage(cv.toDataURL("image/jpeg",0.85),"JPEG",0,0,210,297);
+    }
+    PDF={blob:pdf.output("blob"),nombre:nombreArchivo()};
+    return PDF;
+  } finally { cont.remove(); }
+}
+function listoParaEnviar(){
+  if(!$("#cNombre").value.trim()){ $("#cNombre").focus(); alert("Escribe el nombre del cliente."); return false; }
+  return true;
+}
+async function ocupado(btn,texto,fn){
+  const t=btn.textContent; btn.disabled=true; btn.textContent=texto;
+  try{ await fn(); } catch(e){ console.error(e); alert("No se pudo generar el PDF. Revisa tu conexión e inténtalo de nuevo."); }
+  finally{ btn.disabled=false; btn.textContent=t; }
+}
+function descargar({blob,nombre}){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nombre;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+}
+function chatCliente(){
   const cel=$("#cCel").value.replace(/\D/g,"").replace(/^0/,"593");
-  if(cel.length<11){ $("#cCel").focus(); alert("Revisa el celular del cliente."); return; }
-  const msg=`Hola ${$("#cNombre").value.trim().split(" ")[0]||""}, te comparto la cotización del departamento ${u.unidad} (piso ${u.piso}, tipología ${u.tipologia}) en La Vuelta: ${usd(u.precio)}. Te envío el PDF a continuación.`;
-  window.open(`https://wa.me/${cel}?text=${encodeURIComponent(msg)}`,"_blank");
+  const u=actual();
+  const msg=`Hola ${$("#cNombre").value.trim().split(" ")[0]||""}, te comparto la cotización del departamento ${u.unidad} en La Vuelta.`;
+  window.open(cel.length>=11?`https://wa.me/${cel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");
+}
+async function compartir(){
+  const file=new File([PDF.blob],PDF.nombre,{type:"application/pdf"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:PDF.nombre});
+    return true;
+  }
+  descargar(PDF); chatCliente(); return true;   // computadoras sin menú de compartir
+}
+
+$("#btnPdf").addEventListener("click",e=>{
+  if(!listoParaEnviar()) return;
+  ocupado(e.currentTarget,"Preparando PDF…",async()=>{ descargar(await generarPDF()); });
 });
+
+$("#btnWa").addEventListener("click",e=>{
+  if(!listoParaEnviar()) return;
+  ocupado(e.currentTarget,"Preparando PDF…",async()=>{
+    await generarPDF();
+    try{ await compartir(); }
+    catch(err){
+      if(err && err.name==="AbortError") return;           // el asesor cerró el menú
+      $("#modal").hidden=false;                             // Safari pide un toque nuevo para compartir
+    }
+  });
+});
+$("#mCompartir").addEventListener("click",async()=>{ $("#modal").hidden=true; try{ await compartir(); }catch(e){} });
+$("#mChat").addEventListener("click",()=>{ chatCliente(); });
+$("#mCerrar").addEventListener("click",()=>{ $("#modal").hidden=true; });
 
 /* ---------- Inicio ---------- */
 fetch("unidades.csv",{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.text(); }).then(t=>{

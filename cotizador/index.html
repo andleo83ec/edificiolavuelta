@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#faede1">
+<title>Cotizador · La Vuelta</title>
+<style>
+:root{--vino:#8c2628;--crema:#faede1;--celeste:#b1c3c7;--azul:#4a94c4;--texto:#3b2b2b;--gris:#6f5f5f;--linea:#e3cfc2;--mono:"Courier New",Courier,monospace;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--crema);color:var(--texto);font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+
+/* ---------- Panel del asesor (solo pantalla) ---------- */
+.panel{max-width:860px;margin:0 auto;padding:20px 16px 8px}
+.panel header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.panel header img{width:110px}
+.panel h1{font-family:var(--mono);font-size:15px;letter-spacing:3px;color:var(--vino);margin:0;text-transform:uppercase}
+fieldset{border:0;border-top:1.5px solid var(--vino);margin:0 0 16px;padding:10px 0 0}
+legend{font-family:var(--mono);font-weight:bold;letter-spacing:3px;color:var(--vino);font-size:13px;padding-right:8px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+label{display:block;font-size:12px;color:var(--gris);font-weight:bold;margin-bottom:4px}
+input,select,textarea{width:100%;font:16px Arial,Helvetica,sans-serif;padding:10px;border:1px solid #d8c3b4;border-radius:8px;background:#fff;color:var(--texto)}
+textarea{min-height:60px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--azul);outline-offset:1px}
+.resumen{font-size:14px;line-height:1.6;background:#fff;border-radius:8px;padding:10px 12px;margin-top:10px}
+.resumen b{color:var(--vino)}
+.error{color:#b00020;font-weight:bold}
+.acciones{position:sticky;bottom:0;background:var(--crema);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));border-top:1px solid var(--linea);display:flex;gap:10px;justify-content:center;z-index:5}
+button{font:bold 15px Arial,Helvetica,sans-serif;border:0;border-radius:10px;padding:13px 20px;cursor:pointer}
+.primario{background:var(--vino);color:var(--crema)}
+.secundario{background:var(--celeste);color:#fff}
+button:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+.aviso{font-size:12px;color:var(--gris);margin:4px 0 0}
+
+/* ---------- Vista previa ---------- */
+.preview-wrap{max-width:860px;margin:0 auto;padding:8px 16px 20px}
+.preview-wrap h2{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--gris);margin:6px 0 10px;text-transform:uppercase}
+.escala{transform-origin:top left}
+.hoja{width:794px;height:1123px;background:var(--crema);position:relative;overflow:hidden;box-shadow:0 2px 14px rgba(59,43,43,.18);margin-bottom:18px}
+.hoja .cuerpo{padding:30px 40px 0}
+.pie{position:absolute;left:0;right:0;bottom:0;background:var(--celeste);font-family:var(--mono);letter-spacing:1px;font-size:9.5px;font-weight:bold;color:#fff;text-transform:uppercase;text-align:center;padding:10px 20px}
+.mono{font-family:var(--mono);letter-spacing:3px;text-transform:uppercase}
+.ast{color:var(--azul);font-weight:bold;letter-spacing:2px}
+.titulo{font-family:var(--mono);letter-spacing:4px;font-size:14px;font-weight:bold;color:var(--vino);text-transform:uppercase;padding-bottom:4px;border-bottom:1.5px solid var(--vino)}
+.fila{display:flex;gap:22px}
+.col-i{flex:0 0 56%}.col-d{flex:1;min-width:0}
+.caja{background:var(--celeste);color:#fff;padding:12px 16px}
+.dato{display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:12.5px}
+.dato .l{font-family:var(--mono);letter-spacing:1.5px;font-size:10.5px;font-weight:bold;text-transform:uppercase;color:var(--gris);flex:0 0 auto}
+.dato .v{text-align:right;word-break:break-word}
+.dato.izq .v{text-align:left;flex:1}
+.dato.izq .l{width:80px}
+.dato.sep{border-top:1px solid var(--linea)}
+.dato.sub .l{padding-left:10px}
+.stats{display:flex;gap:8px;margin-top:8px}
+.stat{flex:1;background:var(--celeste);text-align:center;padding:7px 4px;color:#fff}
+.stat.badge{background:var(--vino);color:var(--crema);flex:1.15}
+.stat .sl{font-family:var(--mono);letter-spacing:1px;font-size:10px;font-weight:bold;text-transform:uppercase}
+.stat .sv{font-size:18px;font-weight:bold;padding-top:3px}
+.areas .stat{background:transparent;border:1.5px solid var(--celeste);color:var(--texto)}
+.areas .stat .sl{color:var(--gris)}
+.areas .stat .sv{font-size:16px}
+.areas .stat.total{background:var(--azul);border-color:var(--azul);color:#fff;flex:1.25}
+.areas .stat.total .sl{color:#fff}
+.areas .stat.total .sv{font-size:20px}
+.precio{background:var(--vino);color:var(--crema);padding:12px 10px;text-align:center;margin-top:8px}
+.precio .sv{font-size:23px;font-weight:bold;padding-top:4px}
+.plano{text-align:center}
+.plano img{max-width:100%;max-height:330px;display:inline-block}
+.letras{font-style:italic;color:var(--gris);padding-top:8px;font-size:12.5px}
+.nota{font-family:var(--mono);font-size:9px;color:var(--gris);letter-spacing:1px;line-height:1.5}
+.galeria{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.galeria.dos{grid-template-columns:1fr 1fr}
+.galeria figure{margin:0}
+.galeria .ancho{grid-column:span 2}
+.galeria img{display:block;width:100%;height:auto}
+.galeria figcaption{font-family:var(--mono);letter-spacing:2px;font-size:9.5px;font-weight:bold;text-transform:uppercase;color:var(--vino);padding-top:4px}
+
+@media print{
+  @page{size:A4;margin:0}
+  .panel,.acciones,.preview-wrap h2{display:none!important}
+  .preview-wrap{padding:0;max-width:none}
+  .escala{transform:none!important;height:auto!important}
+  .hoja{box-shadow:none;margin:0;width:210mm;height:297mm;page-break-after:always;break-after:page}
+  .hoja:last-child{page-break-after:auto;break-after:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <header><img src="img/logo.png" alt="La Vuelta"><h1>Cotizador</h1></header>
+
+  <fieldset>
+    <legend>Cliente</legend>
+    <div class="grid">
+      <div><label for="cNombre">Nombre y apellido</label><input id="cNombre" autocomplete="off"></div>
+      <div><label for="cCel">Celular</label><input id="cCel" type="tel" inputmode="tel"></div>
+      <div><label for="cCorreo">Correo</label><input id="cCorreo" type="email" inputmode="email"></div>
+      <div><label for="cCi">Cédula (opcional)</label><input id="cCi" inputmode="numeric"></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Departamento</legend>
+    <div class="grid">
+      <div><label for="piso">Piso</label><select id="piso"></select></div>
+      <div><label for="unidad">Unidad</label><select id="unidad"></select></div>
+    </div>
+    <div class="resumen" id="resumenUnidad">Cargando unidades…</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Forma de pago</legend>
+    <div class="grid">
+      <div><label for="vigencia">Vigencia (días)</label><input id="vigencia" type="number" inputmode="numeric" min="1" value="15"></div>
+    </div>
+    <div class="resumen" id="resumenPago"></div>
+    <div style="margin-top:10px"><label for="obs">Observaciones</label><textarea id="obs"></textarea></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Asesor</legend>
+    <div class="grid">
+      <div><label for="aNombre">Nombre</label><input id="aNombre"></div>
+      <div><label for="aCel">Celular</label><input id="aCel" type="tel" inputmode="tel"></div>
+      <div><label for="aCorreo">Correo</label><input id="aCorreo" type="email" inputmode="email"></div>
+    </div>
+    <p class="aviso">Tus datos de asesor quedan guardados en este dispositivo.</p>
+  </fieldset>
+</div>
+
+<div class="preview-wrap">
+  <h2>Vista previa · 2 hojas A4</h2>
+  <div class="escala" id="escala">
+
+    <!-- ================= HOJA 1 ================= -->
+    <section class="hoja">
+      <div class="cuerpo">
+        <div class="fila" style="align-items:center">
+          <div style="flex:0 0 48%"><img src="img/logo.png" alt="La Vuelta" style="width:240px"></div>
+          <div class="caja" style="flex:1">
+            <div class="mono" style="font-size:11px;font-weight:bold">Cotización</div>
+            <div style="font-size:19px;letter-spacing:3px;padding:2px 0 8px"># <span data-v="codigo"></span></div>
+            <div class="dato"><span class="l" style="color:#fff">Fecha</span><span class="v" data-v="fecha"></span></div>
+            <div class="dato"><span class="l" style="color:#fff">Vigencia hasta</span><span class="v" data-v="vence"></span></div>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="fila">
+          <div class="col-i">
+            <div class="mono" style="font-size:11px;font-weight:bold;color:var(--vino);padding-bottom:6px"><span class="ast">***</span> Un espacio para tu momento <span class="ast">***</span></div>
+            <div style="text-align:justify;line-height:1.45;font-size:12.5px">Desde tu primer departamento hasta un hogar para compartir en familia, La Vuelta ofrece distintas tipologías pensadas para adaptarse a tu forma de vivir. Una ubicación que quieres. Un espacio que puedes hacer tuyo.</div>
+          </div>
+          <div class="col-d">
+            <div class="titulo" style="font-size:11px">Asesor comercial</div>
+            <div class="dato izq"><span class="l">Nombre</span><span class="v" data-v="aNombre"></span></div>
+            <div class="dato izq"><span class="l">Celular</span><span class="v" data-v="aCel"></span></div>
+            <div class="dato izq"><span class="l">E-mail</span><span class="v" data-v="aCorreo"></span></div>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="titulo">Inmueble</div>
+        <div class="stats">
+          <div class="stat badge"><div class="sl">Dpt</div><div class="sv" data-v="unidad"></div></div>
+          <div class="stat"><div class="sl">Piso</div><div class="sv" data-v="piso"></div></div>
+          <div class="stat" style="flex:1.2"><div class="sl">Dormitorios</div><div class="sv" data-v="dorm"></div></div>
+          <div class="stat"><div class="sl">Baños</div><div class="sv" data-v="banos"></div></div>
+          <div class="stat" style="flex:1.25"><div class="sl">Parqueadero</div><div class="sv" data-v="parq"></div></div>
+        </div>
+        <div class="stats areas">
+          <div class="stat"><div class="sl">Área interna</div><div class="sv" data-v="aInt"></div></div>
+          <div class="stat"><div class="sl">Balcón</div><div class="sv" data-v="aBal"></div></div>
+          <div class="stat"><div class="sl">Parqueadero y bodega</div><div class="sv" data-v="aPb"></div></div>
+          <div class="stat total"><div class="sl">Área total</div><div class="sv" data-v="area"></div></div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="fila">
+          <div class="col-i">
+            <div class="titulo">Datos del cliente</div>
+            <div class="dato izq"><span class="l">Nombre</span><span class="v" data-v="cNombre"></span></div>
+            <div class="dato izq"><span class="l">Cédula</span><span class="v" data-v="cCi"></span></div>
+            <div class="dato izq"><span class="l">Celular</span><span class="v" data-v="cCel"></span></div>
+            <div class="dato izq"><span class="l">E-mail</span><span class="v" data-v="cCorreo"></span></div>
+          </div>
+          <div class="col-d">
+            <div class="titulo">Precio</div>
+            <div class="precio"><div class="mono" style="font-size:10px;font-weight:bold">Valor inmueble</div><div class="sv" data-v="precio"></div></div>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="fila">
+          <div class="col-i">
+            <div class="titulo">Forma de pago</div>
+            <div class="dato"><span class="l">Entrada (5%)</span><span class="v" data-v="inicial"></span></div>
+            <div class="dato sep"><span class="l">Durante la construcción (25%)</span><span class="v" data-v="construccion"></span></div>
+            <div class="dato sep"><span class="l">Contra entrega (70%)</span><span class="v" data-v="entrega"></span></div>
+            <div class="letras" data-v="letras"></div>
+
+            <div style="height:14px"></div>
+            <div class="titulo">Observaciones</div>
+            <div style="padding-top:6px;line-height:1.4;font-size:12.5px;white-space:pre-line" data-v="obs"></div>
+            <div class="nota" style="padding-top:14px">* Precios y condiciones sujetos a disponibilidad y a la vigencia indicada. Imágenes referenciales.</div>
+          </div>
+          <div class="col-d plano">
+            <div class="mono" style="font-size:10px;font-weight:bold;color:var(--gris);padding-bottom:6px">Tipología <span data-v="tipo"></span></div>
+            <img id="planoImg" alt="Plano de la tipología">
+          </div>
+        </div>
+      </div>
+      <div class="pie">Un proyecto de Grupo León Vintimilla &nbsp;·&nbsp; con Construlein León Iñiguez &nbsp;·&nbsp; WhatsApp +593 98 334 7804 &nbsp;·&nbsp; www.edificiolavuelta.com</div>
+    </section>
+
+    <!-- ================= HOJA 2 ================= -->
+    <section class="hoja">
+      <div class="cuerpo">
+        <div class="mono" style="font-size:11px;font-weight:bold;color:var(--vino);text-align:center;padding-bottom:12px"><span class="ast">***</span> La Vuelta · de Puertas del Sol <span class="ast">***</span></div>
+        <div class="titulo">Tu departamento</div>
+        <div class="galeria dos" style="margin-top:8px">
+          <figure><img src="img/galeria/sala-comedor.jpg" alt=""><figcaption>Sala y comedor</figcaption></figure>
+          <figure><img src="img/galeria/sala-cocina.jpg" alt=""><figcaption>Sala, comedor y cocina</figcaption></figure>
+        </div>
+        <div style="height:12px"></div>
+        <div class="titulo">Amenities</div>
+        <div class="galeria" style="margin-top:8px">
+          <figure class="ancho"><img src="img/galeria/lobby.jpg" alt=""><figcaption>Lobby</figcaption></figure>
+          <figure><img src="img/galeria/coworking.jpg" alt=""><figcaption>Coworking</figcaption></figure>
+          <figure><img src="img/galeria/bar.jpg" alt=""><figcaption>Bar &amp; terraza</figcaption></figure>
+          <figure><img src="img/galeria/teppanyaki.jpg" alt=""><figcaption>Zona teppanyaki</figcaption></figure>
+          <figure><img src="img/galeria/plaza.jpg" alt=""><figcaption>Plaza comercial</figcaption></figure>
+          <figure><img src="img/galeria/ninos.jpg" alt=""><figcaption>Zona de niños</figcaption></figure>
+          <figure class="ancho"><img src="img/galeria/pet.jpg" alt=""><figcaption>Zona pet friendly</figcaption></figure>
+        </div>
+        <div class="nota" style="text-align:center;padding-top:6px">* Imágenes referenciales.</div>
+      </div>
+      <div class="pie">Un proyecto de Grupo León Vintimilla &nbsp;·&nbsp; con Construlein León Iñiguez &nbsp;·&nbsp; WhatsApp +593 98 334 7804 &nbsp;·&nbsp; www.edificiolavuelta.com</div>
+    </section>
+
+  </div>
+</div>
+
+<div class="acciones">
+  <button class="secundario" id="btnWa" type="button">Enviar por WhatsApp</button>
+  <button class="primario" id="btnPdf" type="button">Descargar PDF</button>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const usd = n => "$" + Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = n => (Math.round(n*10)/10) + "%";
+let UNIDADES = [];
+
+/* ---------- Números a letras ---------- */
+function letras(n){
+  const U=["","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve","veinte","veintiuno","veintidós","veintitrés","veinticuatro","veinticinco","veintiséis","veintisiete","veintiocho","veintinueve"];
+  const D=["","","","treinta","cuarenta","cincuenta","sesenta","setenta","ochenta","noventa"];
+  const C=["","ciento","doscientos","trescientos","cuatrocientos","quinientos","seiscientos","setecientos","ochocientos","novecientos"];
+  const menor1000 = x => {
+    if(x===0) return ""; if(x===100) return "cien";
+    const c=Math.floor(x/100), r=x%100; let s=C[c];
+    if(r){ s+=(s?" ":"") + (r<30 ? U[r] : D[Math.floor(r/10)] + (r%10 ? " y " + U[r%10] : "")); }
+    return s;
+  };
+  const ent=Math.floor(n), cts=Math.round((n-ent)*100);
+  const mill=Math.floor(ent/1e6), miles=Math.floor((ent%1e6)/1000), resto=ent%1000;
+  let s="";
+  if(mill) s+= mill===1 ? "un millón " : menor1000(mill).replace(/uno$/,"un")+" millones ";
+  if(miles) s+= miles===1 ? "mil " : menor1000(miles).replace(/uno$/,"un")+" mil ";
+  s+=menor1000(resto);
+  s=(s.trim()||"cero");
+  return s.charAt(0).toUpperCase()+s.slice(1)+" "+(cts<10?"0":"")+cts+"/100 dólares";
+}
+
+/* ---------- CSV ---------- */
+function parseCSV(t){
+  const [h,...rs]=t.trim().split(/\r?\n/); const k=h.split(",");
+  return rs.map(r=>{const v=r.split(",");const o={};k.forEach((x,i)=>o[x]=v[i]);return o;});
+}
+
+/* ---------- Asesor guardado ---------- */
+const guardables=["aNombre","aCel","aCorreo"];
+try{ const g=JSON.parse(localStorage.getItem("lv-asesor")||"{}"); guardables.forEach(id=>{ if(g[id]) $("#"+id).value=g[id]; }); }catch(e){}
+function guardarAsesor(){ try{ const g={}; guardables.forEach(id=>g[id]=$("#"+id).value); localStorage.setItem("lv-asesor",JSON.stringify(g)); }catch(e){} }
+
+/* ---------- Datos que llegan desde el formulario de eventos ---------- */
+const qs=new URLSearchParams(location.search);
+[["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([p,id])=>{ if(qs.get(p)) $("#"+id).value=qs.get(p); });
+
+/* ---------- Selectores ---------- */
+function llenarUnidades(){
+  const piso=$("#piso").value;
+  $("#unidad").innerHTML=UNIDADES.filter(u=>u.piso===piso).map(u=>{
+    const disp=u.estado.toLowerCase()==="disponible";
+    return `<option value="${u.unidad}" ${disp?"":"disabled"}>${u.unidad} · Tipo ${u.tipologia} · ${u.dormitorios}D · ${usd(u.precio)}${disp?"":" · "+u.estado}</option>`;
+  }).join("");
+  const primera=[...$("#unidad").options].find(o=>!o.disabled); if(primera) $("#unidad").value=primera.value;
+}
+
+function actual(){ return UNIDADES.find(u=>u.unidad===$("#unidad").value); }
+
+function codigo(){
+  const d=new Date(), z=n=>String(n).padStart(2,"0");
+  return `LV-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`;
+}
+let COD=codigo();
+
+/* ---------- Render ---------- */
+function set(k,v){ document.querySelectorAll(`[data-v="${k}"]`).forEach(el=>el.textContent=v); }
+
+function render(){
+  const u=actual(); if(!u) return;
+  const precio=+u.precio;
+  const r2=n=>Math.round(n*100)/100;
+  const vInicial=r2(precio*0.05), vCons=r2(precio*0.25), vEntrega=r2(precio-vInicial-vCons);
+
+  $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.area_total} m² (balcón ${u.area_balcon} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(precio)}</b>`;
+  $("#resumenPago").innerHTML = `Entrada 5% <b>${usd(vInicial)}</b> · Construcción 25% <b>${usd(vCons)}</b> · Contra entrega 70% <b>${usd(vEntrega)}</b>`;
+
+  const hoy=new Date(), vence=new Date(hoy.getTime()+(+$("#vigencia").value||15)*864e5);
+  const f=d=>d.toLocaleDateString("es-EC",{day:"2-digit",month:"2-digit",year:"numeric"});
+  const o=v=>v&&v.trim()?v.trim():"-";
+  set("codigo",COD); set("fecha",f(hoy)); set("vence",f(vence));
+  ["aNombre","aCel","aCorreo","cNombre","cCel","cCorreo","cCi"].forEach(id=>set(id,o($("#"+id).value)));
+  set("unidad",u.unidad); set("piso",u.piso); set("area",`${(+u.area_total).toFixed(2)} m²`);
+  set("dorm",u.dormitorios); set("banos",u.banos); set("tipo",u.tipologia);
+  set("parq", +u.parqueo ? (u.parqueo + (+u.bodega ? " + bodega" : "")) : "No incluye");
+  const m2=v=>`${(+v).toFixed(2)} m²`;
+  set("aInt",m2(u.area_interna)); set("aBal",+u.area_balcon?m2(u.area_balcon):"No tiene"); set("aPb",+u.area_parqueo_bodega?m2(u.area_parqueo_bodega):"No incluye");
+  set("precio",usd(precio)); set("letras",letras(precio));
+  set("inicial",usd(vInicial)); set("construccion",usd(vCons)); set("entrega",usd(vEntrega));
+  set("obs",o($("#obs").value));
+  $("#planoImg").src=`img/planos/tipo-${u.tipologia}.jpg`;
+}
+
+/* ---------- Escala de la vista previa ---------- */
+function escalar(){
+  const w=$(".preview-wrap").clientWidth-32, s=Math.min(1,w/794), e=$("#escala");
+  e.style.transform=`scale(${s})`; e.style.height=(e.scrollHeight*s)+"px";
+}
+window.addEventListener("resize",escalar);
+
+/* ---------- Eventos ---------- */
+document.addEventListener("input",e=>{ if(guardables.includes(e.target.id)) guardarAsesor(); render(); });
+$("#piso").addEventListener("change",()=>{ llenarUnidades(); render(); });
+$("#unidad").addEventListener("change",render);
+$("#btnPdf").addEventListener("click",()=>{
+  if(!$("#cNombre").value.trim()){ $("#cNombre").focus(); alert("Escribe el nombre del cliente antes de descargar."); return; }
+  const n=$("#cNombre").value.trim().split(/\s+/).slice(0,2).join("_");
+  const t=document.title; document.title=`Cotizacion_LaVuelta_${$("#unidad").value}_${n}`;
+  window.print(); setTimeout(()=>document.title=t,1000);
+});
+$("#btnWa").addEventListener("click",()=>{
+  const u=actual(); if(!u) return;
+  const cel=$("#cCel").value.replace(/\D/g,"").replace(/^0/,"593");
+  if(cel.length<11){ $("#cCel").focus(); alert("Revisa el celular del cliente."); return; }
+  const msg=`Hola ${$("#cNombre").value.trim().split(" ")[0]||""}, te comparto la cotización del departamento ${u.unidad} (piso ${u.piso}, tipología ${u.tipologia}) en La Vuelta: ${usd(u.precio)}. Te envío el PDF a continuación.`;
+  window.open(`https://wa.me/${cel}?text=${encodeURIComponent(msg)}`,"_blank");
+});
+
+/* ---------- Inicio ---------- */
+fetch("unidades.csv",{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.text(); }).then(t=>{
+  UNIDADES=parseCSV(t);
+  const pisos=[...new Set(UNIDADES.map(u=>u.piso))];
+  $("#piso").innerHTML=pisos.map(p=>`<option value="${p}">Piso ${p}</option>`).join("");
+  const pedida=qs.get("unidad") && UNIDADES.find(u=>u.unidad===qs.get("unidad"));
+  if(pedida) $("#piso").value=pedida.piso;
+  llenarUnidades(); if(pedida) $("#unidad").value=pedida.unidad;
+  render(); escalar();
+  document.querySelectorAll("img").forEach(i=>i.addEventListener("load",escalar));
+}).catch(()=>{ $("#resumenUnidad").innerHTML='<span class="error">No se pudo leer unidades.csv. Revisa que esté en la misma carpeta que esta página.</span>'; });
+</script>
+</body>
+</html>

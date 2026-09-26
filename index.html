@@ -128,7 +128,9 @@ dialog .cerrar{position:fixed;top:calc(1rem + env(safe-area-inset-top,0px));righ
 .registro .rejilla{display:grid;gap:2.5rem}
 @media (min-width:880px){.registro .rejilla{grid-template-columns:1fr 1fr;align-items:center}}
 .registro .titular{color:var(--crema);text-shadow:.06em .045em 0 var(--vino-hondo);font-size:clamp(2.4rem,6vw,4.2rem);max-width:12ch;margin:0 0 1rem}
-.registro .rejilla>div>p{margin:0;opacity:.9;max-width:44ch}
+.registro .rejilla>div>p{margin:0 0 1.5rem;opacity:.9;max-width:44ch}
+.boton.claro{background:transparent;color:var(--crema);box-shadow:inset 0 0 0 1.5px rgba(250,237,225,.7)}
+.boton.claro:hover{background:rgba(250,237,225,.12)}
 form{display:grid;gap:1rem;background:var(--crema);color:var(--tinta);padding:1.6rem;border-radius:18px}
 label{display:grid;gap:.35rem;font-weight:600;font-size:.95rem}
 input,select{font:inherit;font-weight:400;padding:.85rem 1rem;border:1.5px solid #DCC8B8;border-radius:12px;background:#fff;color:var(--tinta);width:100%}
@@ -156,7 +158,7 @@ footer p{margin:.2rem 0}
     <h1>Tu siguiente oportunidad está a la vuelta.</h1>
     <div class="acciones">
       <a class="boton js-wa" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Escríbenos por WhatsApp</a>
-      <a class="boton suave" href="#amenidades">Ver amenidades</a>
+      <a class="boton suave" href="brochure-la-vuelta.pdf" download="Brochure La Vuelta.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Descargar brochure</a>
     </div>
   </div>
   <figure class="fachada">
@@ -249,6 +251,7 @@ footer p{margin:.2rem 0}
       <div>
         <h2 class="titular">Sé de los primeros en saber.</h2>
         <p>Déjanos tus datos y te escribimos por WhatsApp con planos, precios y fecha de lanzamiento antes que a nadie.</p>
+        <a class="boton claro" href="brochure-la-vuelta.pdf" download="Brochure La Vuelta.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Descargar brochure (PDF)</a>
       </div>
       <form id="formulario" novalidate>
         <label>Nombre

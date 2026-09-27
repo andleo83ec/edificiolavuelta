@@ -111,6 +111,28 @@ dialog img{max-height:84vh;width:auto;margin:auto;border-radius:4px}
 dialog p{color:var(--crema);text-align:center;margin:.75rem 0 0;font-family:var(--display);font-size:1.15rem}
 dialog .cerrar{position:fixed;top:calc(1rem + env(safe-area-inset-top,0px));right:1rem;width:44px;height:44px;border-radius:50%;border:0;background:var(--crema);color:var(--tinta);font-size:1.6rem;line-height:1;cursor:pointer}
 
+/* Ubicación */
+.ubicacion{padding:0 0 clamp(4rem,10vw,7.5rem)}
+.ubicacion .cabeza{display:grid;gap:1rem;margin-bottom:2rem;max-width:60ch}
+.ubicacion .titular{font-size:clamp(2.2rem,6.4vw,4.2rem)}
+.ubicacion .cabeza p{margin:0;color:var(--gris)}
+.mapa{display:block;border-radius:14px;box-shadow:0 0 0 1.5px rgba(140,38,40,.25);overflow:hidden;background:#F6E6D8}
+.mapa-svg{display:block;width:100%;height:auto}
+.mapa:hover .ruta{stroke-dashoffset:-20}
+.anillo{fill:none;stroke:var(--bruma);stroke-width:2.5;stroke-dasharray:4 7}
+.anillo-txt{font:600 17px var(--texto);fill:#7FA3AB}
+.ruta{fill:none;stroke:var(--vino);stroke-width:3;stroke-dasharray:2 9;stroke-linecap:round;opacity:.75;transition:stroke-dashoffset .6s}
+.punto{fill:var(--crema);stroke:var(--vino);stroke-width:4.5}
+.lugar{font:700 21px var(--display);fill:var(--vino)}
+.tiempo{font:500 17px var(--texto);fill:var(--gris)}
+.edificio{font:800 25px var(--display);fill:var(--vino);font-stretch:75%}
+.estrellas-mapa{font-size:15px;fill:var(--cielo);letter-spacing:4px}
+.norte path{fill:var(--tinta);opacity:.7}.norte text{font:700 15px var(--texto);fill:var(--tinta);opacity:.7}
+.nota-mapa{font:500 13px var(--texto);fill:var(--gris);opacity:.8}
+.etq text{paint-order:stroke;stroke:#F6E6D8;stroke-width:6px;stroke-linejoin:round}
+.etq .lugar{font-size:24px}.etq .tiempo{font-size:18px}
+@media (max-width:640px){.etq .lugar{font-size:30px}.etq .tiempo{font-size:23px}.edificio{font-size:34px}.anillo-txt{font-size:22px}.nota-mapa{font-size:19px}}
+.acciones-mapa{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem}
 /* Equipo */
 .equipo{background:var(--crema-2);padding:clamp(4rem,10vw,7.5rem) 0;text-align:center}
 .equipo .titular{font-size:clamp(2.2rem,6vw,4rem);margin-bottom:1.25rem}
@@ -219,14 +241,50 @@ footer p{margin:.2rem 0}
           <figcaption><strong>Zona pet friendly</strong><span>Un espacio para tu mascota, con ducha y área de juego.</span></figcaption></figure>
         <figure class="pieza"><button type="button" data-src="coworking.webp" aria-label="Ampliar: coworking"><img src="coworking.webp" alt="Render del coworking en la terraza, con sala de reuniones y mesas al aire libre" width="1600" height="893" loading="lazy"></button>
           <figcaption><strong>Coworking</strong><span>Sala de reuniones y terraza para trabajar con vista a las montañas.</span></figcaption></figure>
-        <figure class="pieza"><button type="button" data-src="plaza-1.webp" aria-label="Ampliar: plaza central"><img src="plaza-1.webp" alt="Render de la plaza central con árboles, mesas y locales comerciales" width="1600" height="947" loading="lazy"></button>
+        <figure class="pieza"><button type="button" data-src="gimnasio.webp" aria-label="Ampliar: gimnasio"><img src="gimnasio.webp" alt="Render del gimnasio con máquinas, pesas y ventanales hacia el jardín" width="1600" height="900" loading="lazy"></button>
+          <figcaption><strong>Gimnasio</strong><span>Luz natural y vista al jardín para entrenar cerca de casa.</span></figcaption></figure>
+        <figure class="pieza ancha"><button type="button" data-src="plaza-1.webp" aria-label="Ampliar: plaza central"><img src="plaza-1.webp" alt="Render de la plaza central con árboles, mesas y locales comerciales" width="1600" height="947" loading="lazy"></button>
           <figcaption><strong>Plaza central</strong><span>Un espacio abierto con árboles y mesas, para encontrarte con tus vecinos.</span></figcaption></figure>
       </div>
-      <div class="extras">
-        <div class="extra">
-          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M4 24h40M10 16v16M16 12v24M32 12v24M38 16v16"/></svg>
-          <div><strong>Gimnasio</strong><span>Para entrenar a pocos pasos de tu departamento.</span></div>
-        </div>
+    </div>
+  </section>
+
+  <section class="ubicacion" id="ubicacion">
+    <div class="envoltura">
+      <div class="cabeza">
+        <div class="estrellas" aria-hidden="true">✱✱✱</div>
+        <h2 class="titular">Todo te queda a la vuelta</h2>
+        <p>En Puertas del Sol, Cuenca: a pasos de la universidad, el estadio, el Hotel Oro Verde, bancos, cafés y supermercado. Toca el mapa para ver cómo llegar.</p>
+      </div>
+      <a class="mapa" href="https://maps.app.goo.gl/m7TCEkaeVgLNcARX9" target="_blank" rel="noopener" aria-label="Abrir la ubicación de La Vuelta en Google Maps">
+        <svg class="mapa-svg" viewBox="0 0 780 500" role="img" aria-label="Mapa ilustrativo de la ubicación de La Vuelta: a 2 minutos caminando del Campus Balzay de la Universidad de Cuenca, 6 del Estadio Cazhapata, 9 del Hotel Oro Verde y del Banco Pichincha, 11 de Plaza Soleil, 14 del Parque Lineal y a 4 minutos en auto del Supermaxi.">
+  <defs>
+    <pattern id="manzanas" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-14)">
+      <rect x="4" y="4" width="32" height="32" rx="5" fill="#EFDCCB"/>
+    </pattern>
+    <clipPath id="marco"><rect width="780" height="500" rx="14"/></clipPath>
+  </defs>
+  <g clip-path="url(#marco)">
+    <rect width="780" height="500" fill="#F6E6D8"/>
+    <rect width="780" height="500" fill="url(#manzanas)"/>
+    <circle class="anillo" cx="100" cy="300" r="286.8"/>
+    <circle class="anillo" cx="100" cy="300" r="143.4"/>
+    <text class="anillo-txt" x="100" y="473" text-anchor="middle">5 min</text>
+  </g>
+  <path class="ruta" d="M100 300 Q192.9 311.4 262.0 374.6"/><path class="ruta" d="M100 300 Q252.0 249.2 405.3 296.0"/><path class="ruta" d="M100 300 Q289.5 215.3 493.0 256.4"/><path class="ruta" d="M100 300 Q169.9 186.3 292.9 134.3"/><path class="ruta" d="M100 300 Q146.9 173.6 258.4 97.9"/><path class="ruta" d="M100 300 Q381.7 126.0 712.1 147.8"/><circle class="punto" cx="125.3" cy="252.89999999999998" r="10"/><circle class="punto" cx="262.0" cy="374.6" r="10"/><circle class="punto" cx="405.3" cy="296.0" r="10"/><circle class="punto" cx="493.0" cy="256.4" r="10"/><circle class="punto" cx="292.9" cy="134.3" r="10"/><circle class="punto" cx="258.4" cy="97.9" r="10"/><circle class="punto" cx="712.1" cy="147.8" r="10"/><g class="etq"><text class="lugar" x="280" y="88" text-anchor="start">Banco Pichincha</text><text class="tiempo" x="280" y="88" dy="1.25em" text-anchor="start">9 min caminando</text></g><g class="etq"><text class="lugar" x="315" y="172" text-anchor="start">Hotel Oro Verde</text><text class="tiempo" x="315" y="172" dy="1.25em" text-anchor="start">9 min caminando</text></g><g class="etq"><text class="lugar" x="764" y="98" text-anchor="end">Supermaxi</text><text class="tiempo" x="764" y="98" dy="1.25em" text-anchor="end">4 min en auto</text></g><g class="etq"><text class="lugar" x="147.3" y="248.89999999999998" text-anchor="start">La U, Campus Balzay</text><text class="tiempo" x="147.3" y="248.89999999999998" dy="1.25em" text-anchor="start">2 min caminando</text></g><g class="etq"><text class="lugar" x="524" y="238" text-anchor="start">Parque Lineal</text><text class="tiempo" x="524" y="238" dy="1.25em" text-anchor="start">14 min caminando</text></g><g class="etq"><text class="lugar" x="427.3" y="316.0" text-anchor="start">Plaza Soleil</text><text class="tiempo" x="427.3" y="316.0" dy="1.25em" text-anchor="start">11 min caminando</text></g><g class="etq"><text class="lugar" x="284.0" y="384.6" text-anchor="start">Estadio Cazhapata</text><text class="tiempo" x="284.0" y="384.6" dy="1.25em" text-anchor="start">6 min caminando</text></g>
+  <g transform="translate(100 300)">
+    <circle r="32" fill="#8C2628" opacity=".18"/>
+    <path d="M0 14 C-14 -2 -18 -8 -18 -16 A18 18 0 0 1 18 -16 C18 -8 14 -2 0 14Z" transform="translate(0 -14)" fill="#8C2628"/>
+    <circle cy="-30" r="6.5" fill="#FAEDE1"/>
+  </g>
+  <text class="edificio" x="100" y="350" text-anchor="middle">La Vuelta</text>
+  <text class="estrellas-mapa" x="100" y="374" text-anchor="middle">✱✱✱</text>
+  <text class="nota-mapa" x="762" y="484" text-anchor="end">Mapa ilustrativo. Anillos: 5 y 10 min a pie.</text>
+</svg>
+      </a>
+      <div class="acciones-mapa">
+        <a class="boton" href="https://maps.app.goo.gl/m7TCEkaeVgLNcARX9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Abrir en Google Maps</a>
+        <a class="boton suave" href="https://waze.com/ul?ll=-2.892805,-79.036089&amp;navigate=yes" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Abrir en Waze</a>
       </div>
     </div>
   </section>

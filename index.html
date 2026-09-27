@@ -39,6 +39,12 @@ a{color:inherit}
   line-height:.98;letter-spacing:-.01em;margin:0;text-shadow:.06em .045em 0 var(--bruma)}
 .estrellas{color:var(--cielo);letter-spacing:.35em;font-size:1rem;line-height:1;user-select:none}
 
+/* Cinta de promoción */
+.cinta{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.35rem .7rem;padding:.7rem 1rem;background:var(--vino);color:var(--crema);text-decoration:none;font-weight:600;font-size:.92rem;text-align:center;line-height:1.3}
+.cinta-ast{color:var(--bruma);letter-spacing:.2em;font-size:.8rem}
+.cinta-cta{text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.cinta:hover .cinta-cta{text-decoration-thickness:2px}
+@media (max-width:480px){.cinta{font-size:.84rem;padding:.6rem .8rem;gap:.2rem .5rem}.cinta-ast{display:none}}
 /* Portada */
 .portada{padding:1.1rem 0 0;text-align:center}
 .barra{display:flex;justify-content:space-between;align-items:center;gap:1rem;text-align:left}
@@ -155,6 +161,10 @@ dialog .cerrar{position:fixed;top:calc(1rem + env(safe-area-inset-top,0px));righ
 @media (min-width:880px){.registro .rejilla{grid-template-columns:1fr 1fr;align-items:center}}
 .registro .titular{color:var(--crema);text-shadow:.06em .045em 0 var(--vino-hondo);font-size:clamp(2.4rem,6vw,4.2rem);max-width:12ch;margin:0 0 1rem}
 .registro .rejilla>div>p{margin:0 0 1.5rem;opacity:.9;max-width:44ch}
+.promo{background:var(--crema);color:var(--tinta);border-radius:14px;padding:1.3rem 1.4rem;margin:0 0 1.25rem;box-shadow:inset 0 0 0 2px var(--cielo)}
+.promo-tit{margin:0 0 .35rem!important;font-family:var(--display);font-weight:800;font-size:1.35rem;line-height:1.15;color:var(--vino)}
+.promo-tit::before{content:"✱✱✱";display:block;color:var(--cielo);font-size:.8rem;letter-spacing:.25em;margin-bottom:.35rem}
+.promo-txt{margin:0 0 1rem!important;color:var(--gris)!important;opacity:1!important;font-size:.98rem}
 .boton.claro{background:transparent;color:var(--crema);box-shadow:inset 0 0 0 1.5px rgba(250,237,225,.7)}
 .boton.claro:hover{background:rgba(250,237,225,.12)}
 form{display:grid;gap:1rem;background:var(--crema);color:var(--tinta);padding:1.6rem;border-radius:18px}
@@ -173,6 +183,12 @@ footer p{margin:.2rem 0}
 </style>
 </head>
 <body>
+<a class="cinta js-wa-desc" href="#" target="_blank" rel="noopener">
+  <span class="cinta-ast" aria-hidden="true">✱✱✱</span>
+  <span data-en="Special discounts for early payment">Descuentos especiales por pago anticipado</span>
+  <span class="cinta-cta" data-en="Ask us">Consultar</span>
+</a>
+
 
 <header class="portada">
   <div class="envoltura barra">
@@ -313,6 +329,11 @@ footer p{margin:.2rem 0}
       <div>
         <h2 class="titular" data-en="Be among the first to know.">Sé de los primeros en saber.</h2>
         <p data-en="Leave your details and we&#x27;ll message you on WhatsApp with floor plans, prices and the launch date before anyone else.">Déjanos tus datos y te escribimos por WhatsApp con planos, precios y fecha de lanzamiento antes que a nadie.</p>
+        <div class="promo">
+          <p class="promo-tit" data-en="Special early payment discounts">Descuentos especiales por pago anticipado</p>
+          <p class="promo-txt" data-en="Ask us about the conditions and secure the best price for your apartment.">Consulta las condiciones y asegura el mejor precio para tu departamento.</p>
+          <a class="boton promo-btn js-wa-desc" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg><span data-en="I want the discount">Quiero el descuento</span></a>
+        </div>
         <a class="boton claro" href="brochure-la-vuelta.pdf" download="Brochure La Vuelta.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg><span data-en="Download brochure (PDF, Spanish)">Descargar brochure (PDF)</span></a>
       </div>
       <form id="formulario" novalidate>
@@ -321,6 +342,7 @@ footer p{margin:.2rem 0}
         </label>
         <label><span data-en="What are you interested in?">¿Qué te interesa?</span>
           <select name="interes">
+            <option data-en="Early payment discount">Descuento por pago anticipado</option>
             <option data-en="Living at La Vuelta">Vivir en La Vuelta</option>
             <option data-en="Investing">Invertir</option>
             <option data-en="A commercial space">Local comercial</option>
@@ -356,12 +378,14 @@ footer p{margin:.2rem 0}
   const WHATSAPP = "593983347804";
   const TXT = {
     es: { msg: "Hola, quiero información sobre La Vuelta.",
-          form: (n, i) => "Hola, soy " + n + ". Me interesa La Vuelta: " + i.toLowerCase() + ". ¿Me pueden enviar información?",
+          desc: "Hola, quiero información sobre el *descuento especial por pago anticipado* en La Vuelta.",
+          form: (n, i) => "Hola, soy " + n + ". Me interesa La Vuelta: *" + i.toLowerCase() + "*. ¿Me pueden enviar información?",
           err: "Escribe tu nombre para continuar.",
           title: "La Vuelta, de Puertas del Sol — Tu siguiente oportunidad está a la vuelta",
           toggle: "English version" },
     en: { msg: "Hi, I'd like information about La Vuelta.",
-          form: (n, i) => "Hi, I'm " + n + ". I'm interested in La Vuelta: " + i.toLowerCase() + ". Could you send me more information?",
+          desc: "Hi, I'd like information about the *special early payment discount* at La Vuelta.",
+          form: (n, i) => "Hi, I'm " + n + ". I'm interested in La Vuelta: *" + i.toLowerCase() + "*. Could you send me more information?",
           err: "Please enter your name to continue.",
           title: "La Vuelta, Puertas del Sol — Your next opportunity is just around the corner",
           toggle: "Versión en español" }
@@ -383,6 +407,7 @@ footer p{margin:.2rem 0}
     document.title = TXT[l].title;
     document.getElementById("idioma").setAttribute("aria-label", TXT[l].toggle);
     document.querySelectorAll(".js-wa").forEach(a => a.href = wa(TXT[l].msg));
+    document.querySelectorAll(".js-wa-desc").forEach(a => a.href = wa(TXT[l].desc));
     document.getElementById("error").textContent = "";
     try { localStorage.setItem("idioma", l); } catch (e) {}
   }

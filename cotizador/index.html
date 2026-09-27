@@ -17,7 +17,8 @@ body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 .panel{max-width:860px;margin:0 auto;padding:20px 16px 8px}
 .panel header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .panel header img{width:110px}
-.panel .ver{margin-left:auto;font-size:14px;font-weight:bold;color:var(--vino);text-decoration:none;text-align:right}
+.panel .links{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.panel .ver{font-size:14px;font-weight:bold;color:var(--vino);text-decoration:none;text-align:right}
 .panel h1{font-family:var(--mono);font-size:15px;letter-spacing:3px;color:var(--vino);margin:0;text-transform:uppercase}
 fieldset{border:0;border-top:1.5px solid var(--vino);margin:0 0 16px;padding:10px 0 0}
 legend{font-family:var(--mono);font-weight:bold;letter-spacing:3px;color:var(--vino);font-size:13px;padding-right:8px;text-transform:uppercase}
@@ -74,6 +75,14 @@ button:disabled{opacity:.6}
 .areas .stat.total{background:var(--azul);border-color:var(--azul);color:#fff;flex:1.25}
 .areas .stat.total .sl{color:#fff}
 .areas .stat.total .sv{font-size:20px}
+.dato.desc .v{color:#6b7a4f;font-weight:bold}
+.dato.final{background:#fff;padding:5px 6px;margin-top:2px}
+.dato.final .l{color:var(--vino)}
+.dato.final .v{font-weight:bold;font-size:13.5px}
+[hidden]{display:none!important}
+.precio-desc{background:#6b7a4f;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px}
+.precio-desc .mono{font-size:8.5px;font-weight:bold;letter-spacing:1px}
+.precio-desc b{font-size:15px}
 .precio{background:var(--vino);color:var(--crema);padding:12px 10px;text-align:center;margin-top:8px}
 .precio .sv{font-size:23px;font-weight:bold;padding-top:4px}
 .plano{text-align:center}
@@ -100,7 +109,7 @@ button:disabled{opacity:.6}
 <body>
 
 <div class="panel">
-  <header><img src="img/logo.png" alt="La Vuelta"><h1>Cotizador</h1><a class="ver" id="verDisp" href="explorar.html">Ver disponibilidad →</a></header>
+  <header><img src="img/logo.png" alt="La Vuelta"><h1>Cotizador</h1><span class="links"><a class="ver" id="verDisp" href="explorar.html">Ver disponibilidad →</a><a class="ver" id="verCalc" href="calculadora.html">Calculadora →</a></span></header>
 
   <fieldset>
     <legend>Cliente</legend>
@@ -124,6 +133,8 @@ button:disabled{opacity:.6}
   <fieldset>
     <legend>Forma de pago</legend>
     <div class="grid">
+      <div><label for="esquema">Esquema de pago</label><select id="esquema"><option value="estandar">Estándar 5% · 25% · 70%</option><option value="anticipado">Con pago anticipado</option></select></div>
+      <div id="bAnt" hidden><label for="anticipado">Pago anticipado $</label><input id="anticipado" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
       <div><label for="vigencia">Vigencia (días)</label><input id="vigencia" type="number" inputmode="numeric" min="1" value="15"></div>
     </div>
     <div class="resumen" id="resumenPago"></div>
@@ -200,6 +211,7 @@ button:disabled{opacity:.6}
           <div class="col-d">
             <div class="titulo">Precio</div>
             <div class="precio"><div class="mono" style="font-size:10px;font-weight:bold">Valor inmueble</div><div class="sv" data-v="precio"></div></div>
+            <div class="precio-desc" id="precioDesc" hidden><span class="mono">Con descuento por pago anticipado</span><b data-v="final"></b></div>
           </div>
         </div>
 
@@ -207,9 +219,18 @@ button:disabled{opacity:.6}
         <div class="fila">
           <div class="col-i">
             <div class="titulo">Forma de pago</div>
-            <div class="dato"><span class="l">Entrada (5%)</span><span class="v" data-v="inicial"></span></div>
-            <div class="dato sep"><span class="l">Durante la construcción (25%)</span><span class="v" data-v="construccion"></span></div>
-            <div class="dato sep"><span class="l">Contra entrega (70%)</span><span class="v" data-v="entrega"></span></div>
+            <div id="fpEst">
+              <div class="dato"><span class="l">Entrada (5%)</span><span class="v" data-v="inicial"></span></div>
+              <div class="dato sep"><span class="l">Durante la construcción (25%)</span><span class="v" data-v="construccion"></span></div>
+              <div class="dato sep"><span class="l">Contra entrega (70%)</span><span class="v" data-v="entrega"></span></div>
+            </div>
+            <div id="fpAnt" hidden>
+              <div class="dato"><span class="l">Entrada (5%)</span><span class="v" data-v="inicial"></span></div>
+              <div class="dato sep"><span class="l">Pago anticipado</span><span class="v" data-v="anticipado"></span></div>
+              <div class="dato sep desc"><span class="l">Descuento (10% del pago anticipado)</span><span class="v" data-v="descuento"></span></div>
+              <div class="dato sep"><span class="l">Contra entrega</span><span class="v" data-v="entregaAnt"></span></div>
+              <div class="dato sep final"><span class="l">Precio final con descuento</span><span class="v" data-v="final"></span></div>
+            </div>
             <div class="letras" data-v="letras"></div>
 
             <div style="height:14px"></div>
@@ -311,6 +332,7 @@ function guardarAsesor(){ try{ const g={}; guardables.forEach(id=>g[id]=$("#"+id
 /* ---------- Datos que llegan desde el formulario de eventos ---------- */
 const qs=new URLSearchParams(location.search);
 [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([p,id])=>{ if(qs.get(p)) $("#"+id).value=qs.get(p); });
+if(qs.get("anticipado")){ $("#esquema").value="anticipado"; $("#anticipado").value=(+qs.get("anticipado")).toLocaleString("en-US",{maximumFractionDigits:2}); }
 
 /* Enlace al visualizador conservando los datos del cliente */
 function enlaceDisp(){ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); $("#verDisp").href="explorar.html"+(p.toString()?"?"+p:""); }
@@ -342,9 +364,17 @@ function render(){
   const precio=+u.precio;
   const r2=n=>Math.round(n*100)/100;
   const vInicial=r2(precio*0.05), vCons=r2(precio*0.25), vEntrega=r2(precio-vInicial-vCons);
+  const ant=$("#esquema").value==="anticipado";
+  $("#bAnt").hidden=!ant; $("#fpEst").hidden=ant; $("#fpAnt").hidden=!ant; $("#precioDesc").hidden=!ant;
+  const maxAnt=Math.floor((precio-vInicial)/1.1*100)/100;
+  let pAnt=parseFloat($("#anticipado").value.replace(/[^\d.]/g,"")); if(!isFinite(pAnt)) pAnt=0;
+  const excede=pAnt>maxAnt; if(excede) pAnt=maxAnt;
+  const vDesc=r2(pAnt*0.10), vEntAnt=r2(precio-vInicial-pAnt-vDesc), vFinal=r2(precio-vDesc);
 
   $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.area_total} m² (balcón ${u.area_balcon} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(precio)}</b>`;
-  $("#resumenPago").innerHTML = `Entrada 5% <b>${usd(vInicial)}</b> · Construcción 25% <b>${usd(vCons)}</b> · Contra entrega 70% <b>${usd(vEntrega)}</b>`;
+  $("#resumenPago").innerHTML = ant
+    ? `Entrada <b>${usd(vInicial)}</b> · Anticipado <b>${usd(pAnt)}</b> · Descuento <b>${usd(vDesc)}</b> · Contra entrega <b>${usd(vEntAnt)}</b> · Precio final <b>${usd(vFinal)}</b>`+(excede?`<br><span class="error">El pago anticipado máximo para esta unidad es ${usd(maxAnt)}.</span>`:"")
+    : `Entrada 5% <b>${usd(vInicial)}</b> · Construcción 25% <b>${usd(vCons)}</b> · Contra entrega 70% <b>${usd(vEntrega)}</b>`;
 
   const hoy=new Date(), vence=new Date(hoy.getTime()+(+$("#vigencia").value||15)*864e5);
   const f=d=>d.toLocaleDateString("es-EC",{day:"2-digit",month:"2-digit",year:"numeric"});
@@ -358,6 +388,7 @@ function render(){
   set("aInt",m2(u.area_interna)); set("aBal",+u.area_balcon?m2(u.area_balcon):"No tiene"); set("aPb",+u.area_parqueo_bodega?m2(u.area_parqueo_bodega):"No incluye");
   set("precio",usd(precio)); set("letras",letras(precio));
   set("inicial",usd(vInicial)); set("construccion",usd(vCons)); set("entrega",usd(vEntrega));
+  set("anticipado",usd(pAnt)); set("descuento",usd(vDesc)); set("entregaAnt",usd(vEntAnt)); set("final",usd(vFinal));
   set("obs",o($("#obs").value));
   $("#planoImg").src=`img/planos/tipo-${u.tipologia}.jpg`;
 }
@@ -373,6 +404,9 @@ window.addEventListener("resize",escalar);
 document.addEventListener("input",e=>{ if(guardables.includes(e.target.id)) guardarAsesor(); render(); });
 $("#piso").addEventListener("change",()=>{ llenarUnidades(); render(); });
 $("#unidad").addEventListener("change",render);
+const enlaceCalc=()=>{ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); p.set("unidad",$("#unidad").value); $("#verCalc").href="calculadora.html?"+p; };
+["cNombre","cCel","cCorreo","cCi"].forEach(id=>$("#"+id).addEventListener("input",enlaceCalc));
+$("#unidad").addEventListener("change",enlaceCalc); $("#piso").addEventListener("change",enlaceCalc);
 /* ---------- PDF real (2 hojas A4) para descargar o compartir ---------- */
 let PDF=null;                       // se invalida cada vez que cambia algo
 const invalidar=()=>{ PDF=null; };
@@ -465,7 +499,7 @@ fetch("unidades.csv",{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.t
   const pedida=qs.get("unidad") && UNIDADES.find(u=>u.unidad===qs.get("unidad"));
   if(pedida) $("#piso").value=pedida.piso;
   llenarUnidades(); if(pedida) $("#unidad").value=pedida.unidad;
-  render(); escalar();
+  render(); escalar(); enlaceCalc();
   document.querySelectorAll("img").forEach(i=>i.addEventListener("load",escalar));
 }).catch(()=>{ $("#resumenUnidad").innerHTML='<span class="error">No se pudo leer unidades.csv. Revisa que esté en la misma carpeta que esta página.</span>'; });
 </script>

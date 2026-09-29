@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#faede1">
 <title>Cotizador · La Vuelta</title>
+<script src="plan.js"></script>
 <style>
 :root{--vino:#8c2628;--crema:#faede1;--celeste:#b1c3c7;--azul:#4a94c4;--texto:#3b2b2b;--gris:#6f5f5f;--linea:#e3cfc2;--mono:"Courier New",Courier,monospace;}
 *{box-sizing:border-box}
@@ -59,7 +60,8 @@ button:disabled{opacity:.6}
 .caja{background:var(--celeste);color:#fff;padding:12px 16px}
 .dato{display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:12.5px}
 .dato .l{font-family:var(--mono);letter-spacing:1.5px;font-size:10.5px;font-weight:bold;text-transform:uppercase;color:var(--gris);flex:0 0 auto}
-.dato .v{text-align:right;word-break:break-word}
+.dato .v{text-align:right;white-space:nowrap}
+
 .dato.izq .v{text-align:left;flex:1}
 .dato.izq .l{width:80px}
 .dato.sep{border-top:1px solid var(--linea)}
@@ -104,6 +106,7 @@ button:disabled{opacity:.6}
   .hoja{box-shadow:none;margin:0 auto;width:210mm;height:280mm;page-break-after:always;break-after:page}
   .hoja:last-child{page-break-after:auto;break-after:auto}
 }
+#fpP .dato .l{white-space:normal;flex:1 1 auto;min-width:0;line-height:1.35}
 </style>
 </head>
 <body>
@@ -133,8 +136,11 @@ button:disabled{opacity:.6}
   <fieldset>
     <legend>Forma de pago</legend>
     <div class="grid">
-      <div><label for="esquema">Esquema de pago</label><select id="esquema"><option value="estandar">Estándar 5% · 25% · 70%</option><option value="anticipado">Con pago anticipado</option></select></div>
-      <div id="bAnt" hidden><label for="anticipado">Pago anticipado $</label><input id="anticipado" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+      <div><label for="esquema">Esquema de pago</label><select id="esquema"><option value="estandar">Estándar 5% · 25% · 70%</option><option value="p">Plan personalizado</option></select></div>
+      <div class="bP" hidden><label for="pEnt">Entrada %</label><input id="pEnt" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="5"></div>
+      <div class="bP" hidden><label for="pAnt">Pago anticipado $</label><input id="pAnt" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+      <div class="bP" hidden><label for="pN">N° de cuotas</label><input id="pN" type="number" inputmode="numeric" min="0" step="1" value="30"></div>
+      <div class="bP" hidden><label for="pCuo">Total en cuotas $</label><input id="pCuo" type="text" inputmode="decimal" autocomplete="off"></div>
       <div><label for="vigencia">Vigencia (días)</label><input id="vigencia" type="number" inputmode="numeric" min="1" value="15"></div>
     </div>
     <div class="resumen" id="resumenPago"></div>
@@ -211,7 +217,7 @@ button:disabled{opacity:.6}
           <div class="col-d">
             <div class="titulo">Precio</div>
             <div class="precio"><div class="mono" style="font-size:10px;font-weight:bold">Valor inmueble</div><div class="sv" data-v="precio"></div></div>
-            <div class="precio-desc" id="precioDesc" hidden><span class="mono">Con descuento por pago anticipado</span><b data-v="final"></b></div>
+            <div class="precio-desc" id="precioDesc" hidden><span class="mono">Con descuento por pronto pago</span><b data-v="final"></b></div>
           </div>
         </div>
 
@@ -224,11 +230,12 @@ button:disabled{opacity:.6}
               <div class="dato sep"><span class="l">Durante la construcción (25%)</span><span class="v" data-v="construccion"></span></div>
               <div class="dato sep"><span class="l">Contra entrega (70%)</span><span class="v" data-v="entrega"></span></div>
             </div>
-            <div id="fpAnt" hidden>
-              <div class="dato"><span class="l">Entrada (5%)</span><span class="v" data-v="inicial"></span></div>
-              <div class="dato sep"><span class="l">Pago anticipado</span><span class="v" data-v="anticipado"></span></div>
-              <div class="dato sep desc"><span class="l">Descuento (10% del pago anticipado)</span><span class="v" data-v="descuento"></span></div>
-              <div class="dato sep"><span class="l">Contra entrega</span><span class="v" data-v="entregaAnt"></span></div>
+            <div id="fpP" hidden>
+              <div class="dato"><span class="l">Entrada (<span data-v="pEntPct"></span>%)</span><span class="v" data-v="pE"></span></div>
+              <div class="dato sep" id="rowAnt"><span class="l">Pago anticipado</span><span class="v" data-v="pA"></span></div>
+              <div class="dato sep" id="rowCuo"><span class="l">Durante la construcción <span style="font-weight:normal">(<span data-v="pCuoTxt"></span>)</span></span><span class="v" data-v="pC"></span></div>
+              <div class="dato sep"><span class="l">Contra entrega</span><span class="v" data-v="pCE"></span></div>
+              <div class="dato sep desc"><span class="l">Descuento por pronto pago (tasa <span data-v="pTasa"></span>% anual)</span><span class="v" data-v="pD"></span></div>
               <div class="dato sep final"><span class="l">Precio final con descuento</span><span class="v" data-v="final"></span></div>
             </div>
             <div class="letras" data-v="letras"></div>
@@ -332,7 +339,12 @@ function guardarAsesor(){ try{ const g={}; guardables.forEach(id=>g[id]=$("#"+id
 /* ---------- Datos que llegan desde el formulario de eventos ---------- */
 const qs=new URLSearchParams(location.search);
 [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([p,id])=>{ if(qs.get(p)) $("#"+id).value=qs.get(p); });
-if(qs.get("anticipado")){ $("#esquema").value="anticipado"; $("#anticipado").value=(+qs.get("anticipado")).toLocaleString("en-US",{maximumFractionDigits:2}); }
+const fmtN=v=>v?Number(v).toLocaleString("en-US",{maximumFractionDigits:2}):"";
+let cuoEditado=false;
+if(qs.get("plan")==="p"){ $("#esquema").value="p"; $("#pEnt").value=qs.get("ent")??LV_CONFIG.entradaPct; $("#pAnt").value=fmtN(+qs.get("ant")||0);
+  $("#pN").value=qs.get("n")??LV_CONFIG.plazoMeses; $("#pCuo").value=fmtN(+qs.get("cuotas")||0); cuoEditado=true; }
+$("#pCuo").addEventListener("input",()=>{ cuoEditado=true; });
+["#pAnt","#pCuo"].forEach(s=>$(s).addEventListener("blur",e=>{ const v=parseFloat(e.target.value.replace(/[^\d.]/g,"")); e.target.value=isFinite(v)?fmtN(v):""; }));
 
 /* Enlace al visualizador conservando los datos del cliente */
 function enlaceDisp(){ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); $("#verDisp").href="explorar.html"+(p.toString()?"?"+p:""); }
@@ -364,16 +376,16 @@ function render(){
   const precio=+u.precio;
   const r2=n=>Math.round(n*100)/100;
   const vInicial=r2(precio*0.05), vCons=r2(precio*0.25), vEntrega=r2(precio-vInicial-vCons);
-  const ant=$("#esquema").value==="anticipado";
-  $("#bAnt").hidden=!ant; $("#fpEst").hidden=ant; $("#fpAnt").hidden=!ant; $("#precioDesc").hidden=!ant;
-  const maxAnt=Math.floor((precio-vInicial)/1.1*100)/100;
-  let pAnt=parseFloat($("#anticipado").value.replace(/[^\d.]/g,"")); if(!isFinite(pAnt)) pAnt=0;
-  const excede=pAnt>maxAnt; if(excede) pAnt=maxAnt;
-  const vDesc=r2(pAnt*0.10), vEntAnt=r2(precio-vInicial-pAnt-vDesc), vFinal=r2(precio-vDesc);
+  const pers=$("#esquema").value==="p";
+  document.querySelectorAll(".bP").forEach(b=>b.hidden=!pers); $("#fpEst").hidden=pers; $("#fpP").hidden=!pers; $("#precioDesc").hidden=!pers;
+  const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+  if(pers && !cuoEditado) $("#pCuo").value=fmtN(Math.round(precio*LV_CONFIG.cuotasPct)/100);
+  const pl=lvPlan(precio,{entradaPct:nv($("#pEnt")),anticipado:nv($("#pAnt")),cuotas:nv($("#pN")),totalCuotas:nv($("#pCuo"))});
+  const vFinal=pers?pl.final:precio;
 
   $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.area_total} m² (balcón ${u.area_balcon} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(precio)}</b>`;
-  $("#resumenPago").innerHTML = ant
-    ? `Entrada <b>${usd(vInicial)}</b> · Anticipado <b>${usd(pAnt)}</b> · Descuento <b>${usd(vDesc)}</b> · Contra entrega <b>${usd(vEntAnt)}</b> · Precio final <b>${usd(vFinal)}</b>`+(excede?`<br><span class="error">El pago anticipado máximo para esta unidad es ${usd(maxAnt)}.</span>`:"")
+  $("#resumenPago").innerHTML = pers
+    ? `Entrada <b>${usd(pl.E)}</b> · Anticipado <b>${usd(pl.A)}</b> · ${pl.n} cuotas de <b>${usd(pl.c)}</b> · Contra entrega <b>${usd(pl.CE)}</b> · Descuento <b>${usd(pl.D)}</b> · Precio final <b>${usd(pl.final)}</b>`+pl.avisos.map(a=>`<br><span class="error">${a}</span>`).join("")
     : `Entrada 5% <b>${usd(vInicial)}</b> · Construcción 25% <b>${usd(vCons)}</b> · Contra entrega 70% <b>${usd(vEntrega)}</b>`;
 
   const hoy=new Date(), vence=new Date(hoy.getTime()+(+$("#vigencia").value||15)*864e5);
@@ -388,7 +400,9 @@ function render(){
   set("aInt",m2(u.area_interna)); set("aBal",+u.area_balcon?m2(u.area_balcon):"No tiene"); set("aPb",+u.area_parqueo_bodega?m2(u.area_parqueo_bodega):"No incluye");
   set("precio",usd(precio)); set("letras",letras(precio));
   set("inicial",usd(vInicial)); set("construccion",usd(vCons)); set("entrega",usd(vEntrega));
-  set("anticipado",usd(pAnt)); set("descuento",usd(vDesc)); set("entregaAnt",usd(vEntAnt)); set("final",usd(vFinal));
+  set("pEntPct",pl.entradaPct); set("pE",usd(pl.E)); set("pA",usd(pl.A)); set("pCuoTxt",`${pl.n} cuotas de ${usd(pl.c)}`); set("pC",usd(pl.total));
+  set("pCE",usd(pl.CE)); set("pTasa",pl.tasa); set("pD",pl.D?"− "+usd(pl.D):usd(0)); set("final",usd(vFinal));
+  $("#rowAnt").hidden=!pl.A; $("#rowCuo").hidden=!pl.n;
   set("obs",o($("#obs").value));
   $("#planoImg").src=`img/planos/tipo-${u.tipologia}.jpg`;
 }
@@ -404,7 +418,11 @@ window.addEventListener("resize",escalar);
 document.addEventListener("input",e=>{ if(guardables.includes(e.target.id)) guardarAsesor(); render(); });
 $("#piso").addEventListener("change",()=>{ llenarUnidades(); render(); });
 $("#unidad").addEventListener("change",render);
-const enlaceCalc=()=>{ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); p.set("unidad",$("#unidad").value); $("#verCalc").href="calculadora.html?"+p; };
+const enlaceCalc=()=>{ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); p.set("unidad",$("#unidad").value);
+  if($("#esquema").value==="p"){ const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+    p.set("plan","p"); p.set("ent",nv($("#pEnt"))); p.set("ant",nv($("#pAnt"))); p.set("n",nv($("#pN"))); p.set("cuotas",nv($("#pCuo"))); }
+  $("#verCalc").href="calculadora.html?"+p; };
+document.addEventListener("input",()=>enlaceCalc()); document.addEventListener("change",()=>enlaceCalc());
 ["cNombre","cCel","cCorreo","cCi"].forEach(id=>$("#"+id).addEventListener("input",enlaceCalc));
 $("#unidad").addEventListener("change",enlaceCalc); $("#piso").addEventListener("change",enlaceCalc);
 /* ---------- PDF real (2 hojas A4) para descargar o compartir ---------- */

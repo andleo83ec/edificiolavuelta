@@ -164,8 +164,9 @@ $("#btnCot").addEventListener("click",()=>{
 // Volver al cotizador conservando al cliente
 { const q=new URLSearchParams(); ["nombre","cel","correo","ci","unidad"].forEach(k=>{ if(qs.get(k)) q.set(k,qs.get(k)); }); $("#volver").href="/cotizador/"+(q.toString()?"?"+q:""); }
 
-fetch("unidades.csv",{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.text(); }).then(t=>{
-  U=parseCSV(t);
+lvCargarUnidades().then(datos=>{
+  U=datos;
+  U.forEach(u=>{u.precio=+u.precio;});
   $("#piso").innerHTML=[...new Set(U.map(u=>u.piso))].map(p=>`<option value="${p}">Piso ${p}</option>`).join("");
   const pedida=qs.get("unidad") && U.find(u=>u.unidad===qs.get("unidad"));
   if(pedida) $("#piso").value=pedida.piso;

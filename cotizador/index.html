@@ -510,8 +510,8 @@ $("#mChat").addEventListener("click",()=>{ chatCliente(); });
 $("#mCerrar").addEventListener("click",()=>{ $("#modal").hidden=true; });
 
 /* ---------- Inicio ---------- */
-fetch("unidades.csv",{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.text(); }).then(t=>{
-  UNIDADES=parseCSV(t);
+lvCargarUnidades().then(datos=>{
+  UNIDADES=datos;
   const pisos=[...new Set(UNIDADES.map(u=>u.piso))];
   $("#piso").innerHTML=pisos.map(p=>`<option value="${p}">Piso ${p}</option>`).join("");
   const pedida=qs.get("unidad") && UNIDADES.find(u=>u.unidad===qs.get("unidad"));

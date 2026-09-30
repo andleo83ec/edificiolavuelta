@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#faede1">
 <title>Disponibilidad · La Vuelta</title>
+<script src="plan.js"></script>
 <style>
 :root{--vino:#8c2628;--crema:#faede1;--celeste:#b1c3c7;--azul:#4a94c4;--texto:#3b2b2b;--gris:#6f5f5f;--linea:#e3cfc2;--oliva:#6b7a4f;--mono:"Courier New",Courier,monospace;}
 *{box-sizing:border-box}
@@ -203,8 +204,9 @@ function chips(el,opciones,clave){
     el.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b)); render(); });
 }
 
-fetch("unidades.csv",{cache:"no-store"}).then(r=>{ if(!r.ok) throw 0; return r.text(); }).then(t=>{
-  U=parseCSV(t);
+lvCargarUnidades().then(datos=>{
+  U=datos;
+  U.forEach(u=>{u.precio=+u.precio;u.piso=+u.piso;});
   const dorms=[...new Set(U.map(u=>u.dormitorios))].sort();
   chips($("#fDorm"),[["","Todos"],...dorms.map(d=>[d,d])],"dorm");
   [...new Set(U.map(u=>u.piso))].sort((a,b)=>a-b).forEach(p=>$("#fPiso").insertAdjacentHTML("beforeend",`<option value="${p}">Piso ${p}</option>`));

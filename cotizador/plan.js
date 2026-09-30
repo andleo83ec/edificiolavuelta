@@ -6,7 +6,51 @@ window.LV_CONFIG = {
   tasaAnual: 7,     // % anual con la que se calcula el descuento por pronto pago
   plazoMeses: 30,   // meses de construcción (fecha del pago contra entrega)
   entradaPct: 5,    // entrada del plan estándar
-  cuotasPct: 25     // % pagado en cuotas durante la construcción en el plan estándar
+  cuotasPct: 25,    // % pagado en cuotas durante la construcción en el plan estándar
+
+  // Enlace CSV de la hoja de Google publicada (Archivo → Compartir → Publicar en la web → CSV).
+  // Déjalo vacío ("") para usar el archivo unidades.csv del repositorio.
+  fuenteDatos: ""
+};
+
+/* ---------- Lectura de unidades (hoja de Google o unidades.csv) ---------- */
+function lvNumero(v){
+  let s=String(v??"").replace(/[^\d,.\-]/g,"");
+  if(s.includes(",")&&s.includes(".")) s = s.lastIndexOf(",")>s.lastIndexOf(".") ? s.replace(/\./g,"").replace(",",".") : s.replace(/,/g,"");
+  else if(s.includes(",")) s = /,\d{1,2}$/.test(s) ? s.replace(",",".") : s.replace(/,/g,"");
+  const n=parseFloat(s); return isFinite(n)?n:0;
+}
+function lvParseCSV(texto){
+  const filas=[]; let fila=[], campo="", q=false;
+  for(let i=0;i<texto.length;i++){
+    const ch=texto[i];
+    if(q){ if(ch==='"'){ if(texto[i+1]==='"'){campo+='"';i++;} else q=false; } else campo+=ch; }
+    else if(ch==='"') q=true;
+    else if(ch===","){ fila.push(campo); campo=""; }
+    else if(ch==="\n"||ch==="\r"){ if(ch==="\r"&&texto[i+1]==="\n") i++; fila.push(campo); filas.push(fila); fila=[]; campo=""; }
+    else campo+=ch;
+  }
+  if(campo!==""||fila.length){ fila.push(campo); filas.push(fila); }
+  const [cab,...resto]=filas.filter(r=>r.some(c=>c.trim()!==""));
+  const k=cab.map(c=>c.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g,"_"));
+  const numericos=["area_interna","area_balcon","area_parqueo_bodega","area_total","precio"];
+  return resto.map(r=>{ const o={}; k.forEach((x,i)=>o[x]=(r[i]??"").trim());
+    numericos.forEach(x=>o[x]=String(lvNumero(o[x])));
+    ["unidad","piso","dormitorios","banos","parqueo","bodega"].forEach(x=>o[x]=String(Math.round(lvNumero(o[x]))));
+    o.tipologia=String(Math.round(lvNumero(o.tipologia))).padStart(2,"0");
+    const e=(o.estado||"Disponible").toLowerCase();
+    o.estado= e.startsWith("disp")?"Disponible": e.startsWith("res")?"Reservado": e.startsWith("vend")?"Vendido": o.estado;
+    return o; }).filter(o=>+o.unidad>0);
+}
+window.lvCargarUnidades = async function(){
+  const fuente=window.LV_CONFIG.fuenteDatos;
+  if(fuente){
+    try{ const r=await fetch(fuente+(fuente.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
+      if(r.ok){ const u=lvParseCSV(await r.text()); if(u.length) return u; } }
+    catch(e){ console.warn("No se pudo leer la hoja de Google; se usa unidades.csv",e); }
+  }
+  const r=await fetch("unidades.csv",{cache:"no-store"}); if(!r.ok) throw new Error("sin datos");
+  return lvParseCSV(await r.text());
 };
 
 /* Calcula un plan personalizado que tenga el mismo valor presente que el plan estándar.

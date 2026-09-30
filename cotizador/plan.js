@@ -2,6 +2,7 @@
    La Vuelta · configuración y cálculo del plan de pagos
    Cambia aquí las condiciones comerciales (aplica a calculadora y cotizador).
    ================================================================ */
+window.LV_VERSION = "2026-09-29 hoja-google";
 window.LV_CONFIG = {
   tasaAnual: 7,     // % anual con la que se calcula el descuento por pronto pago
   plazoMeses: 30,   // meses de construcción (fecha del pago contra entrega)

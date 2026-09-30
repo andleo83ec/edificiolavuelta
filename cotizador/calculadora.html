@@ -65,6 +65,20 @@ button:focus-visible,.chip:focus-visible{outline:3px solid var(--azul);outline-o
   </div>
 
   <div class="card">
+    <p class="ctit">Descuento al precio</p>
+    <div class="grid">
+      <div><label class="flbl" for="dTipo">Tipo</label><select id="dTipo"><option value="p">Porcentaje %</option><option value="m">Monto $</option></select></div>
+      <div><label class="flbl" for="dVal">Valor</label><input id="dVal" class="monto" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+    </div>
+    <div class="atajos" id="atajosDesc">
+      <button type="button" class="chip" data-d="0">Sin descuento</button>
+      <button type="button" class="chip" data-d="2">2%</button>
+      <button type="button" class="chip" data-d="3">3%</button>
+      <button type="button" class="chip" data-d="5">5%</button>
+    </div>
+  </div>
+
+  <div class="card">
     <p class="ctit">Plan del cliente</p>
     <div class="grid">
       <div><label class="flbl" for="entrada">Entrada %</label><input id="entrada" type="number" inputmode="decimal" min="0" max="100" step="0.5"></div>
@@ -78,17 +92,19 @@ button:focus-visible,.chip:focus-visible{outline:3px solid var(--azul);outline-o
       <button type="button" class="chip" data-a="sin-cuotas">Sin cuotas</button>
       <button type="button" class="chip" data-a="todo">Pagar todo en construcción</button>
     </div>
-    <div class="tasa"><span>Descuento por pronto pago calculado al</span><b id="tasaTxt"></b></div>
+    <div class="tasa" id="bTasa"><span>Descuento por pronto pago calculado al</span><b id="tasaTxt"></b></div>
   </div>
 
   <div class="card">
     <div id="avisos"></div>
     <div class="linea"><span class="l">Valor del departamento</span><span class="v" id="rPrecio"></span></div>
+    <div class="linea desc" id="fCom"><span class="l">Descuento al precio<small id="sCom"></small></span><span class="v" id="rCom"></span></div>
+    <div class="linea" id="fNeto"><span class="l">Precio con descuento</span><span class="v" id="rNeto"></span></div>
     <div class="linea"><span class="l" id="lEntrada">Entrada</span><span class="v" id="rEntrada"></span></div>
     <div class="linea" id="fAnt"><span class="l">Pago anticipado<small>al firmar</small></span><span class="v" id="rAnt"></span></div>
     <div class="linea" id="fCuo"><span class="l">Durante la construcción<small id="sCuo"></small></span><span class="v" id="rCuo"></span></div>
     <div class="linea"><span class="l">Contra entrega<small id="sCE"></small></span><span class="v" id="rCE"></span></div>
-    <div class="linea desc"><span class="l">Descuento por pronto pago<small id="sDesc"></small></span><span class="v" id="rDesc"></span></div>
+    <div class="linea desc" id="fPP"><span class="l">Descuento por pronto pago<small id="sDesc"></small></span><span class="v" id="rDesc"></span></div>
     <div class="total"><span class="l">Precio final</span><span class="v" id="rFinal"></span></div>
     <div class="comp" id="comp"></div>
     <button class="generar" id="btnCot" type="button">Generar cotización con este plan</button>
@@ -124,15 +140,19 @@ function estandar(){
 
 function calcular(){
   const u=actual(); if(!u) return;
-  if(!totalEditado) $("#totalCuotas").value=fmt(Math.round(u.precio*CFG.cuotasPct)/100);
-  const p=lvPlan(u.precio,{entradaPct:num($("#entrada")),anticipado:num($("#anticipado")),cuotas:num($("#cuotas")),totalCuotas:num($("#totalCuotas"))});
+  const dc=lvDescuento(u.precio,$("#dTipo").value,num($("#dVal"))), base=dc.neto;
+  if(!totalEditado) $("#totalCuotas").value=fmt(Math.round(base*CFG.cuotasPct)/100);
+  const p=lvPlan(base,{entradaPct:num($("#entrada")),anticipado:num($("#anticipado")),cuotas:num($("#cuotas")),totalCuotas:num($("#totalCuotas"))});
   ultimo=p;
-  const s=lvPlan(u.precio,{});
+  const s=lvPlan(base,{});
+  $("#fPP").hidden=!p.D;
+  $("#bTasa").innerHTML=`<span>El descuento al precio es directo, sin intereses. Solo el pronto pago (por adelantar pagos) se calcula al</span><b id="tasaTxt">${p.tasa}% anual</b>`;
+  $("#fCom").hidden=!dc.desc; $("#fNeto").hidden=!dc.desc;
+  $("#sCom").textContent=`${dc.pct.toFixed(2)}% del precio de lista`; $("#rCom").textContent="− "+usd(dc.desc); $("#rNeto").textContent=usd(base);
   $("#info").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.dormitorios} dorm. · ${(+u.area_total).toFixed(2)} m²`;
   $("#ayudaCuotas").textContent=p.n?`${p.n} cuotas mensuales de ${usd(p.c)} (máximo ${CFG.plazoMeses} meses de construcción)`:`Sin cuotas durante la construcción`;
-  $("#tasaTxt").textContent=`${p.tasa}% anual`;
   $("#avisos").innerHTML=p.avisos.map(a=>`<div class="aviso">${a}</div>`).join("");
-  $("#rPrecio").textContent=usd(p.precio);
+  $("#rPrecio").textContent=usd(u.precio);
   $("#lEntrada").textContent=`Entrada (${p.entradaPct}%)`; $("#rEntrada").textContent=usd(p.E);
   $("#fAnt").hidden=!p.A; $("#rAnt").textContent=usd(p.A);
   $("#fCuo").hidden=!p.n; $("#sCuo").textContent=`${p.n} cuotas de ${usd(p.c)}`; $("#rCuo").textContent=usd(p.total);
@@ -142,7 +162,9 @@ function calcular(){
   $("#comp").innerHTML=`<b>Plan estándar:</b> entrada ${usd(s.E)} · ${s.n} cuotas de ${usd(s.c)} · contra entrega ${usd(s.CE)} · sin descuento.<br>El descuento equivale a los intereses que el proyecto ahorra al recibir el dinero antes, calculados al ${p.tasa}% anual.`;
 }
 
-document.querySelectorAll("#entrada,#anticipado,#cuotas").forEach(el=>el.addEventListener("input",calcular));
+document.querySelectorAll("#entrada,#anticipado,#cuotas,#dVal").forEach(el=>el.addEventListener("input",calcular));
+$("#dTipo").addEventListener("change",calcular);
+$("#atajosDesc").addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b) return; $("#dTipo").value="p"; $("#dVal").value=+b.dataset.d?b.dataset.d:""; calcular(); });
 $("#totalCuotas").addEventListener("input",()=>{ totalEditado=true; calcular(); });
 ["#anticipado","#totalCuotas"].forEach(s=>$(s).addEventListener("blur",e=>{ const v=num(e.target); e.target.value=fmt(v); }));
 document.querySelector(".atajos").addEventListener("click",e=>{
@@ -157,7 +179,7 @@ $("#unidad").addEventListener("change",calcular);
 $("#btnCot").addEventListener("click",()=>{
   const u=actual(), p=ultimo; if(!u||!p) return;
   const q=new URLSearchParams(); ["nombre","cel","correo","ci"].forEach(k=>{ if(qs.get(k)) q.set(k,qs.get(k)); });
-  q.set("unidad",u.unidad); q.set("plan","p"); q.set("ent",p.entradaPct); q.set("ant",p.A); q.set("n",p.n); q.set("cuotas",p.total);
+  q.set("unidad",u.unidad); { const dv=num($("#dVal")); if(dv){ q.set("dt",$("#dTipo").value); q.set("dv",dv); } } q.set("plan","p"); q.set("ent",p.entradaPct); q.set("ant",p.A); q.set("n",p.n); q.set("cuotas",p.total);
   location.href="/cotizador/?"+q;
 });
 
@@ -172,6 +194,7 @@ lvCargarUnidades().then(datos=>{
   if(pedida) $("#piso").value=pedida.piso;
   llenarUnidades(); if(pedida) $("#unidad").value=pedida.unidad;
   estandar();
+  if(qs.get("dv")){ $("#dTipo").value=qs.get("dt")==="m"?"m":"p"; $("#dVal").value=qs.get("dv"); }
   if(qs.get("plan")==="p"){ $("#entrada").value=qs.get("ent")??CFG.entradaPct; $("#anticipado").value=fmt(+qs.get("ant")||0);
     $("#cuotas").value=qs.get("n")??CFG.plazoMeses; $("#totalCuotas").value=fmt(+qs.get("cuotas")||0); totalEditado=true; }
   calcular();

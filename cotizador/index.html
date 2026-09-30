@@ -245,8 +245,8 @@ button:disabled{opacity:.6}
               <div class="dato sep" id="rowAnt"><span class="l">Pago anticipado</span><span class="v" data-v="pA"></span></div>
               <div class="dato sep" id="rowCuo"><span class="l">Durante la construcción <span style="font-weight:normal">(<span data-v="pCuoTxt"></span>)</span></span><span class="v" data-v="pC"></span></div>
               <div class="dato sep"><span class="l">Contra entrega</span><span class="v" data-v="pCE"></span></div>
-              <div class="dato sep desc"><span class="l">Descuento por pronto pago</span><span class="v" data-v="pD"></span></div>
-              <div class="dato sep final"><span class="l">Precio final con descuento</span><span class="v" data-v="final"></span></div>
+              <div class="dato sep desc" id="rowPP"><span class="l">Descuento por pronto pago</span><span class="v" data-v="pD"></span></div>
+              <div class="dato sep final" id="rowFinal"><span class="l">Precio final con descuento</span><span class="v" data-v="final"></span></div>
             </div>
             <div class="letras" data-v="letras"></div>
 
@@ -389,7 +389,7 @@ function render(){
   const r2=n=>Math.round(n*100)/100;
   const vInicial=r2(precio*0.05), vCons=r2(precio*0.25), vEntrega=r2(precio-vInicial-vCons);
   const pers=$("#esquema").value==="p";
-  document.querySelectorAll(".bP").forEach(b=>b.hidden=!pers); $("#fpEst").hidden=pers; $("#fpP").hidden=!pers; $("#precioDesc").hidden=!pers;
+  document.querySelectorAll(".bP").forEach(b=>b.hidden=!pers); $("#fpEst").hidden=pers; $("#fpP").hidden=!pers;
   const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
   if(pers && !cuoEditado) $("#pCuo").value=fmtN(Math.round(precio*LV_CONFIG.cuotasPct)/100);
   const pl=lvPlan(precio,{entradaPct:nv($("#pEnt")),anticipado:nv($("#pAnt")),cuotas:nv($("#pN")),totalCuotas:nv($("#pCuo"))});
@@ -416,6 +416,7 @@ function render(){
   set("pEntPct",pl.entradaPct); set("pE",usd(pl.E)); set("pA",usd(pl.A)); set("pCuoTxt",`${pl.n} cuotas de ${usd(pl.c)}`); set("pC",usd(pl.total));
   set("pCE",usd(pl.CE)); set("pTasa",pl.tasa); set("pD",pl.D?"− "+usd(pl.D):usd(0)); set("final",usd(vFinal));
   $("#rowAnt").hidden=!pl.A; $("#rowCuo").hidden=!pl.n;
+  $("#rowPP").hidden=!pl.D; $("#rowFinal").hidden=!pl.D; $("#precioDesc").hidden=!(pers&&pl.D);
   set("obs",o($("#obs").value));
   $("#planoImg").src=`img/planos/tipo-${u.tipologia}.jpg`;
   ULT = pers

@@ -88,6 +88,14 @@ window.lvPlan = function (precio, o) {
   let total = n ? Math.max(0, o.totalCuotas ?? precio * C.cuotasPct / 100) : 0;
   let c = n ? total / n : 0;
 
+  if (o.sinPronto) {                                            // descuento al precio: sin descuento por pronto pago
+    if (E + A > precio) { A = r2(Math.max(0, precio - E)); avisos.push("El pago anticipado cubre todo el departamento; se ajustó al máximo."); }
+    if (E + A + total > precio) { total = Math.max(0, precio - E - A); avisos.push("Con estos pagos el departamento queda pagado en la construcción; se ajustó la cuota."); }
+    c = n ? r2(total / n) : 0; total = r2(c * n);
+    const CE = r2(Math.max(0, precio - E - A - total));
+    return { precio, E, entradaPct: o.entradaPct ?? C.entradaPct, A, n, c, total, CE, D: 0,
+             final: precio, pctDesc: 0, tasa: o.tasa ?? C.tasaAnual, plazo: T, avisos, sinPronto: true };
+  }
   if (E + A > vpStd) {                                          // pagó todo al inicio
     A = r2(Math.max(0, vpStd - E)); c = 0; total = 0;
     avisos.push("El pago anticipado cubre todo el departamento; se ajustó al máximo.");

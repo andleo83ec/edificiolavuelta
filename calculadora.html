@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<base href="/cotizador/">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#faede1">
+<title>Calculadora · La Vuelta</title>
+<script src="plan.js"></script>
+<style>
+:root{--vino:#8c2628;--crema:#faede1;--celeste:#b1c3c7;--azul:#4a94c4;--texto:#3b2b2b;--gris:#6f5f5f;--linea:#e3cfc2;--oliva:#6b7a4f;--mono:"Courier New",Courier,monospace;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--crema);color:var(--texto);font-family:Arial,Helvetica,sans-serif}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+header img{width:100px}
+header h1{font-family:var(--mono);font-size:14px;letter-spacing:3px;color:var(--vino);margin:0;text-transform:uppercase;text-align:right}
+.volver{font-size:14px;font-weight:bold;color:var(--vino);text-decoration:none}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 1px 6px rgba(59,43,43,.07)}
+.ctit{font-family:var(--mono);font-size:12px;font-weight:bold;letter-spacing:3px;text-transform:uppercase;color:var(--vino);margin:0 0 10px}
+.flbl{font-family:var(--mono);font-size:10.5px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:var(--gris);margin-bottom:5px;display:block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select,input{width:100%;font:16px Arial,Helvetica,sans-serif;padding:11px;border:1px solid #d8c3b4;border-radius:8px;background:#fff;color:var(--texto)}
+input.monto{font-size:19px;font-weight:bold;color:var(--vino)}
+input:focus,select:focus{outline:2px solid var(--azul);outline-offset:1px}
+.info{font-size:13.5px;color:var(--gris);margin-top:10px;line-height:1.5}
+.info b{color:var(--texto)}
+.ayuda{font-size:12px;color:var(--gris);margin-top:5px}
+.atajos{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{border:1.5px solid var(--celeste);background:#fff;color:var(--texto);border-radius:999px;padding:8px 12px;font:bold 13px Arial,Helvetica,sans-serif;cursor:pointer}
+.chip:active{background:var(--crema)}
+.tasa{display:flex;justify-content:space-between;gap:10px;background:var(--crema);border-radius:8px;padding:9px 11px;font-size:13px;margin-top:12px}
+.tasa b{color:var(--vino)}
+.aviso{background:#fff4e5;border-left:4px solid #c77d1a;color:#6b4200;font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:10px}
+.linea{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 0;border-bottom:1px solid var(--linea)}
+.linea .l{font-family:var(--mono);font-size:10.5px;font-weight:bold;letter-spacing:1.3px;text-transform:uppercase;color:var(--gris)}
+.linea .l small{display:block;font-family:Arial,Helvetica,sans-serif;letter-spacing:0;text-transform:none;font-weight:normal;font-size:12px;margin-top:2px}
+.linea .v{font-size:16.5px;font-weight:bold;white-space:nowrap;text-align:right}
+.linea.desc .v{color:var(--oliva)}
+.linea[hidden]{display:none}
+.total{background:var(--vino);color:var(--crema);border-radius:10px;padding:14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.total .l{font-family:var(--mono);font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase}
+.total .v{font-size:23px;font-weight:bold}
+.comp{font-size:12.5px;color:var(--gris);margin-top:12px;line-height:1.5;background:var(--crema);border-radius:8px;padding:9px 11px}
+.generar{width:100%;margin-top:12px;background:var(--vino);color:var(--crema);border:0;border-radius:10px;padding:14px;font:bold 15px Arial,Helvetica,sans-serif;cursor:pointer}
+button:focus-visible,.chip:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="volver" id="volver" href="/cotizador/">← Cotizador</a>
+    <img src="img/logo.png" alt="La Vuelta">
+    <h1>Calculadora</h1>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div><label class="flbl" for="piso">Piso</label><select id="piso"></select></div>
+      <div><label class="flbl" for="unidad">Departamento</label><select id="unidad"></select></div>
+    </div>
+    <div class="info" id="info">Cargando…</div>
+  </div>
+
+  <div class="card">
+    <p class="ctit">Plan del cliente</p>
+    <div class="grid">
+      <div><label class="flbl" for="entrada">Entrada %</label><input id="entrada" type="number" inputmode="decimal" min="0" max="100" step="0.5"></div>
+      <div><label class="flbl" for="anticipado">Pago anticipado $</label><input id="anticipado" class="monto" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+      <div><label class="flbl" for="cuotas">N° de cuotas</label><input id="cuotas" type="number" inputmode="numeric" min="0" step="1"></div>
+      <div><label class="flbl" for="totalCuotas">Total en cuotas $</label><input id="totalCuotas" class="monto" type="text" inputmode="decimal" autocomplete="off"></div>
+    </div>
+    <div class="ayuda" id="ayudaCuotas"></div>
+    <div class="atajos">
+      <button type="button" class="chip" data-a="estandar">Plan estándar</button>
+      <button type="button" class="chip" data-a="sin-cuotas">Sin cuotas</button>
+      <button type="button" class="chip" data-a="todo">Pagar todo en construcción</button>
+    </div>
+    <div class="tasa"><span>Descuento por pronto pago calculado al</span><b id="tasaTxt"></b></div>
+  </div>
+
+  <div class="card">
+    <div id="avisos"></div>
+    <div class="linea"><span class="l">Valor del departamento</span><span class="v" id="rPrecio"></span></div>
+    <div class="linea"><span class="l" id="lEntrada">Entrada</span><span class="v" id="rEntrada"></span></div>
+    <div class="linea" id="fAnt"><span class="l">Pago anticipado<small>al firmar</small></span><span class="v" id="rAnt"></span></div>
+    <div class="linea" id="fCuo"><span class="l">Durante la construcción<small id="sCuo"></small></span><span class="v" id="rCuo"></span></div>
+    <div class="linea"><span class="l">Contra entrega<small id="sCE"></small></span><span class="v" id="rCE"></span></div>
+    <div class="linea desc"><span class="l">Descuento por pronto pago<small id="sDesc"></small></span><span class="v" id="rDesc"></span></div>
+    <div class="total"><span class="l">Precio final</span><span class="v" id="rFinal"></span></div>
+    <div class="comp" id="comp"></div>
+    <button class="generar" id="btnCot" type="button">Generar cotización con este plan</button>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const CFG=window.LV_CONFIG;
+const usd=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const num=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+const fmt=v=>v?Number(v).toLocaleString("en-US",{maximumFractionDigits:2}):"";
+const qs=new URLSearchParams(location.search);
+let U=[], totalEditado=false, ultimo=null;
+
+function parseCSV(t){ const [h,...rs]=t.trim().split(/\r?\n/); const k=h.split(",");
+  return rs.map(r=>{const v=r.split(",");const o={};k.forEach((x,i)=>o[x]=v[i]);o.precio=+o.precio;return o;}); }
+const actual=()=>U.find(u=>u.unidad===$("#unidad").value);
+
+function llenarUnidades(){
+  $("#unidad").innerHTML=U.filter(u=>u.piso===$("#piso").value).map(u=>{
+    const ok=(u.estado||"").toLowerCase()==="disponible";
+    return `<option value="${u.unidad}" ${ok?"":"disabled"}>${u.unidad} · Tipo ${u.tipologia}${ok?"":" · "+u.estado}</option>`;
+  }).join("");
+  const p=[...$("#unidad").options].find(o=>!o.disabled); if(p) $("#unidad").value=p.value;
+}
+
+function estandar(){
+  const u=actual(); if(!u) return;
+  $("#entrada").value=CFG.entradaPct; $("#anticipado").value=""; $("#cuotas").value=CFG.plazoMeses;
+  $("#totalCuotas").value=fmt(Math.round(u.precio*CFG.cuotasPct)/100); totalEditado=false;
+}
+
+function calcular(){
+  const u=actual(); if(!u) return;
+  if(!totalEditado) $("#totalCuotas").value=fmt(Math.round(u.precio*CFG.cuotasPct)/100);
+  const p=lvPlan(u.precio,{entradaPct:num($("#entrada")),anticipado:num($("#anticipado")),cuotas:num($("#cuotas")),totalCuotas:num($("#totalCuotas"))});
+  ultimo=p;
+  const s=lvPlan(u.precio,{});
+  $("#info").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.dormitorios} dorm. · ${(+u.area_total).toFixed(2)} m²`;
+  $("#ayudaCuotas").textContent=p.n?`${p.n} cuotas mensuales de ${usd(p.c)} (máximo ${CFG.plazoMeses} meses de construcción)`:`Sin cuotas durante la construcción`;
+  $("#tasaTxt").textContent=`${p.tasa}% anual`;
+  $("#avisos").innerHTML=p.avisos.map(a=>`<div class="aviso">${a}</div>`).join("");
+  $("#rPrecio").textContent=usd(p.precio);
+  $("#lEntrada").textContent=`Entrada (${p.entradaPct}%)`; $("#rEntrada").textContent=usd(p.E);
+  $("#fAnt").hidden=!p.A; $("#rAnt").textContent=usd(p.A);
+  $("#fCuo").hidden=!p.n; $("#sCuo").textContent=`${p.n} cuotas de ${usd(p.c)}`; $("#rCuo").textContent=usd(p.total);
+  $("#sCE").textContent=`al mes ${p.plazo}`; $("#rCE").textContent=usd(p.CE);
+  $("#sDesc").textContent=`${p.pctDesc.toFixed(2)}% del precio`; $("#rDesc").textContent=p.D?"− "+usd(p.D):usd(0);
+  $("#rFinal").textContent=usd(p.final);
+  $("#comp").innerHTML=`<b>Plan estándar:</b> entrada ${usd(s.E)} · ${s.n} cuotas de ${usd(s.c)} · contra entrega ${usd(s.CE)} · sin descuento.<br>El descuento equivale a los intereses que el proyecto ahorra al recibir el dinero antes, calculados al ${p.tasa}% anual.`;
+}
+
+document.querySelectorAll("#entrada,#anticipado,#cuotas").forEach(el=>el.addEventListener("input",calcular));
+$("#totalCuotas").addEventListener("input",()=>{ totalEditado=true; calcular(); });
+["#anticipado","#totalCuotas"].forEach(s=>$(s).addEventListener("blur",e=>{ const v=num(e.target); e.target.value=fmt(v); }));
+document.querySelector(".atajos").addEventListener("click",e=>{
+  const b=e.target.closest(".chip"); if(!b) return; const u=actual();
+  if(b.dataset.a==="estandar") estandar();
+  if(b.dataset.a==="sin-cuotas"){ $("#cuotas").value=0; $("#totalCuotas").value=""; totalEditado=true; }
+  if(b.dataset.a==="todo"){ if(num($("#cuotas"))<1) $("#cuotas").value=CFG.plazoMeses; $("#totalCuotas").value=fmt(u.precio); totalEditado=true; }
+  calcular();
+});
+$("#piso").addEventListener("change",()=>{ llenarUnidades(); calcular(); });
+$("#unidad").addEventListener("change",calcular);
+$("#btnCot").addEventListener("click",()=>{
+  const u=actual(), p=ultimo; if(!u||!p) return;
+  const q=new URLSearchParams(); ["nombre","cel","correo","ci"].forEach(k=>{ if(qs.get(k)) q.set(k,qs.get(k)); });
+  q.set("unidad",u.unidad); q.set("plan","p"); q.set("ent",p.entradaPct); q.set("ant",p.A); q.set("n",p.n); q.set("cuotas",p.total);
+  location.href="/cotizador/?"+q;
+});
+
+// Volver al cotizador conservando al cliente
+{ const q=new URLSearchParams(); ["nombre","cel","correo","ci","unidad"].forEach(k=>{ if(qs.get(k)) q.set(k,qs.get(k)); }); $("#volver").href="/cotizador/"+(q.toString()?"?"+q:""); }
+
+lvCargarUnidades().then(datos=>{
+  U=datos;
+  U.forEach(u=>{u.precio=+u.precio;});
+  $("#piso").innerHTML=[...new Set(U.map(u=>u.piso))].map(p=>`<option value="${p}">Piso ${p}</option>`).join("");
+  const pedida=qs.get("unidad") && U.find(u=>u.unidad===qs.get("unidad"));
+  if(pedida) $("#piso").value=pedida.piso;
+  llenarUnidades(); if(pedida) $("#unidad").value=pedida.unidad;
+  estandar();
+  if(qs.get("plan")==="p"){ $("#entrada").value=qs.get("ent")??CFG.entradaPct; $("#anticipado").value=fmt(+qs.get("ant")||0);
+    $("#cuotas").value=qs.get("n")??CFG.plazoMeses; $("#totalCuotas").value=fmt(+qs.get("cuotas")||0); totalEditado=true; }
+  calcular();
+}).catch(()=>{ $("#info").textContent="No se pudo leer unidades.csv."; });
+</script>
+</body>
+</html>

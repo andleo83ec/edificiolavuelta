@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<base href="/cotizador/">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#faede1">
+<title>Disponibilidad · La Vuelta</title>
+<script src="plan.js"></script>
+<style>
+:root{--vino:#8c2628;--crema:#faede1;--celeste:#b1c3c7;--azul:#4a94c4;--texto:#3b2b2b;--gris:#6f5f5f;--linea:#e3cfc2;--oliva:#6b7a4f;--mono:"Courier New",Courier,monospace;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--crema);color:var(--texto);font-family:Arial,Helvetica,sans-serif}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:900px;margin:0 auto;padding:18px 14px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+header img{width:100px}
+header h1{font-family:var(--mono);font-size:14px;letter-spacing:3px;color:var(--vino);margin:0;text-transform:uppercase;text-align:right}
+a{color:var(--vino)}
+.volver{font-size:14px;font-weight:bold;text-decoration:none}
+
+/* Filtros */
+.filtros{background:#fff;border-radius:12px;padding:12px;display:grid;gap:12px;position:sticky;top:0;z-index:5;box-shadow:0 2px 10px rgba(59,43,43,.08)}
+.flbl{font-family:var(--mono);font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:var(--gris);margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--celeste);background:#fff;color:var(--texto);border-radius:999px;padding:8px 14px;font:bold 14px Arial,Helvetica,sans-serif;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--vino);border-color:var(--vino);color:var(--crema)}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select{width:100%;font:16px Arial,Helvetica,sans-serif;padding:9px;border:1px solid #d8c3b4;border-radius:8px;background:#fff;color:var(--texto)}
+input[type=range]{width:100%;accent-color:var(--vino)}
+.precio-val{font-weight:bold;color:var(--vino)}
+.check{display:flex;align-items:center;gap:8px;font-size:14px}
+.check input{width:20px;height:20px;accent-color:var(--vino)}
+.mas{display:none}
+.filtros.abierto .mas{display:grid;gap:12px}
+.toggle{background:none;border:0;color:var(--vino);font:bold 13px Arial,Helvetica,sans-serif;padding:0;cursor:pointer;justify-self:start}
+.resumen{font-size:13px;color:var(--gris);margin:14px 2px 8px}
+.resumen b{color:var(--texto)}
+
+/* Tarjetas de tipología */
+.lista{display:grid;gap:12px}
+details.tipo{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(59,43,43,.07)}
+details.tipo summary{list-style:none;display:grid;grid-template-columns:92px 1fr auto;gap:12px;align-items:center;padding:10px;cursor:pointer}
+details.tipo summary::-webkit-details-marker{display:none}
+.thumb{width:92px;height:92px;background:var(--crema);border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.thumb img{max-width:100%;max-height:100%}
+.tnum{font-family:var(--mono);font-size:11px;letter-spacing:2px;font-weight:bold;color:var(--vino);text-transform:uppercase}
+.tdat{font-size:13.5px;margin:3px 0;line-height:1.35}
+.tdat.parq{font-size:12.5px;color:var(--oliva);font-weight:bold}
+.tdat.parq.sin{color:var(--gris)}
+.tprecio{font-size:15px;font-weight:bold}
+.disp{font-family:var(--mono);font-size:10.5px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#fff;background:var(--oliva);border-radius:6px;padding:5px 7px;text-align:center;white-space:nowrap}
+.disp.cero{background:var(--gris)}
+.flecha{display:block;text-align:center;color:var(--vino);font-size:18px;margin-top:6px;transition:transform .2s}
+details[open] .flecha{transform:rotate(180deg)}
+
+.detalle{border-top:1px solid var(--linea);padding:10px 10px 12px}
+.detalle .plano{text-align:center;background:var(--crema);border-radius:8px;padding:8px;margin-bottom:10px}
+.detalle .plano img{max-width:100%;max-height:340px}
+.tabla-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);text-align:right;padding:6px 6px;border-bottom:1.5px solid var(--vino);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td{padding:9px 6px;border-bottom:1px solid var(--linea);text-align:right;white-space:nowrap}
+tr.ok{cursor:pointer}
+tr.ok:active{background:var(--crema)}
+tr.no td{color:#b3a39a;text-decoration:line-through}
+tr.no td.est{text-decoration:none}
+td.pr{font-weight:bold}
+td.est span{font-size:11px;font-weight:bold;border-radius:5px;padding:3px 6px;color:#fff;background:var(--oliva)}
+tr.no td.est span{background:var(--gris)}
+.barato{color:var(--oliva)}
+.nota{font-size:12px;color:var(--gris);margin-top:8px}
+.vacio{text-align:center;color:var(--gris);padding:30px 10px;font-size:15px}
+button:focus-visible,.chip:focus-visible,summary:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="volver" id="volver" href="/cotizador/">← Cotizador</a>
+    <img src="img/logo.png" alt="La Vuelta">
+    <h1>Disponibilidad</h1>
+  </header>
+
+  <div class="filtros" id="filtros">
+    <div>
+      <div class="flbl">Dormitorios</div>
+      <div class="chips" id="fDorm"></div>
+    </div>
+    <div>
+      <div class="flbl">Precio hasta: <span class="precio-val" id="pVal"></span></div>
+      <input type="range" id="fPrecio" aria-label="Precio máximo">
+    </div>
+    <button class="toggle" id="btnMas" type="button" aria-expanded="false">+ Más filtros</button>
+    <div class="mas">
+      <div class="fila">
+        <div><div class="flbl">Piso</div><select id="fPiso"><option value="">Todos</option></select></div>
+        <div><div class="flbl">Ordenar por</div>
+          <select id="fOrden">
+            <option value="precio">Precio: menor a mayor</option>
+            <option value="precio-desc">Precio: mayor a menor</option>
+            <option value="tipo">Tipología</option>
+            <option value="area">Área interna</option>
+          </select></div>
+      </div>
+      <div class="fila">
+        <div><div class="flbl">Baños</div><select id="fBanos"><option value="">Todos</option></select></div>
+        <div><div class="flbl">Balcón</div><select id="fBalcon"><option value="">Indiferente</option><option value="si">Con balcón</option></select></div>
+      </div>
+      <div class="fila">
+        <div><div class="flbl">Parqueadero</div><select id="fParq"><option value="">Indiferente</option><option value="si">Con parqueadero</option><option value="no">Sin parqueadero</option></select></div>
+        <div></div>
+      </div>
+      <label class="check"><input type="checkbox" id="fDisp" checked> Solo disponibles</label>
+    </div>
+  </div>
+
+  <div class="resumen" id="resumen">Cargando…</div>
+  <div class="lista" id="lista"></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const usd=n=>"$"+Math.round(n).toLocaleString("en-US");
+const usd2=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const m2=v=>(+v).toFixed(2)+" m²";
+const qs=new URLSearchParams(location.search);
+let U=[], F={dorm:"",piso:"",banos:"",balcon:"",parq:"",disp:true,orden:"precio",precio:0};
+const abiertos=new Set();
+
+// Conserva los datos del cliente al ir y volver del cotizador
+const cliente=new URLSearchParams(); ["nombre","cel","correo","ci"].forEach(k=>{ if(qs.get(k)) cliente.set(k,qs.get(k)); });
+$("#volver").href="/cotizador/"+(cliente.toString()?"?"+cliente:"");
+const irA=u=>{ const p=new URLSearchParams(cliente); p.set("unidad",u); location.href="/cotizador/?"+p; };
+
+function parseCSV(t){ const [h,...rs]=t.trim().split(/\r?\n/); const k=h.split(",");
+  return rs.map(r=>{const v=r.split(",");const o={};k.forEach((x,i)=>o[x]=v[i]);o.precio=+o.precio;o.piso=+o.piso;return o;}); }
+const disponible=u=>(u.estado||"").toLowerCase()==="disponible";
+
+function cumple(u){
+  if(F.dorm && u.dormitorios!==F.dorm) return false;
+  if(F.piso && u.piso!==+F.piso) return false;
+  if(F.banos && u.banos!==F.banos) return false;
+  if(F.balcon==="si" && !(+u.area_balcon>0)) return false;
+  if(F.parq==="si" && !(+u.parqueo>0)) return false;
+  if(F.parq==="no" && +u.parqueo>0) return false;
+  if(u.precio>F.precio) return false;
+  return true;
+}
+
+function render(){
+  const pasan=U.filter(cumple);
+  const visibles=F.disp?pasan.filter(disponible):pasan;
+  const grupos={};
+  visibles.forEach(u=>(grupos[u.tipologia]=grupos[u.tipologia]||[]).push(u));
+  let tipos=Object.keys(grupos).map(t=>{
+    const us=grupos[t].sort((a,b)=>a.piso-b.piso), ps=us.map(u=>u.precio), b=us[0];
+    return {t,us,min:Math.min(...ps),max:Math.max(...ps),disp:us.filter(disponible).length,dorm:b.dormitorios,banos:b.banos,ai:+b.area_interna,parq:+b.parqueo,bod:+b.bodega};
+  });
+  const o={precio:(a,b)=>a.min-b.min,"precio-desc":(a,b)=>b.max-a.max,tipo:(a,b)=>a.t.localeCompare(b.t),area:(a,b)=>b.ai-a.ai}[F.orden];
+  tipos.sort(o);
+
+  $("#resumen").innerHTML=`<b>${tipos.length}</b> tipologías · <b>${visibles.length}</b> ${F.disp?"unidades disponibles":"unidades"}`;
+  if(!tipos.length){ $("#lista").innerHTML=`<div class="vacio">No hay departamentos con esos filtros.<br>Prueba subir el precio o quitar un filtro.</div>`; return; }
+
+  $("#lista").innerHTML=tipos.map(g=>{
+    const filas=g.us.map(u=>{
+      const ok=disponible(u), bar=u.precio===g.min&&g.us.length>1;
+      return `<tr class="${ok?"ok":"no"}" ${ok?`data-u="${u.unidad}"`:""}>
+        <td>${u.piso}</td><td>${u.unidad}</td><td>${+u.area_balcon?m2(u.area_balcon):"—"}</td><td>${m2(u.area_total)}</td>
+        <td class="pr ${bar?"barato":""}">${usd2(u.precio)}</td><td class="est"><span>${ok?"Disp.":u.estado}</span></td></tr>`;
+    }).join("");
+    const rango=g.min===g.max?usd(g.min):`${usd(g.min)} – ${usd(g.max)}`;
+    return `<details class="tipo" data-t="${g.t}" ${abiertos.has(g.t)?"open":""}>
+      <summary>
+        <div class="thumb"><img src="img/planos/tipo-${g.t}.jpg" alt="" loading="lazy"></div>
+        <div>
+          <div class="tnum">Tipología ${g.t}</div>
+          <div class="tdat">${g.dorm} dorm. · ${g.banos} baño${g.banos==="1"?"":"s"} · ${m2(g.ai)} internos</div>
+          <div class="tdat parq ${g.parq?"":"sin"}">${g.parq?`🚗 ${g.parq} parqueadero${g.parq>1?"s":""}${g.bod?" + bodega":""}`:"Sin parqueadero ni bodega"}</div>
+          <div class="tprecio">${rango}</div>
+        </div>
+        <div><div class="disp ${g.disp?"":"cero"}">${g.disp} disp.</div><span class="flecha">▾</span></div>
+      </summary>
+      <div class="detalle">
+        <div class="plano"><img src="img/planos/tipo-${g.t}.jpg" alt="Plano tipología ${g.t}" loading="lazy"></div>
+        <div class="tabla-scroll"><table>
+          <thead><tr><th>Piso</th><th>Dpt</th><th>Balcón</th><th>Total</th><th>Precio</th><th></th></tr></thead>
+          <tbody>${filas}</tbody></table></div>
+        <div class="nota">Toca un departamento disponible para cotizarlo. En verde, el precio más bajo de esta tipología.</div>
+      </div>
+    </details>`;
+  }).join("");
+
+  document.querySelectorAll("details.tipo").forEach(d=>d.addEventListener("toggle",()=>{ d.open?abiertos.add(d.dataset.t):abiertos.delete(d.dataset.t); }));
+  document.querySelectorAll("tr.ok").forEach(tr=>tr.addEventListener("click",()=>irA(tr.dataset.u)));
+}
+
+function chips(el,opciones,clave){
+  el.innerHTML=opciones.map(([v,l])=>`<button type="button" class="chip" data-v="${v}" aria-pressed="${F[clave]===v}">${l}</button>`).join("");
+  el.addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b) return; F[clave]=b.dataset.v;
+    el.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b)); render(); });
+}
+
+lvCargarUnidades().then(datos=>{
+  U=datos;
+  U.forEach(u=>{u.precio=+u.precio;u.piso=+u.piso;});
+  const dorms=[...new Set(U.map(u=>u.dormitorios))].sort();
+  chips($("#fDorm"),[["","Todos"],...dorms.map(d=>[d,d])],"dorm");
+  [...new Set(U.map(u=>u.piso))].sort((a,b)=>a-b).forEach(p=>$("#fPiso").insertAdjacentHTML("beforeend",`<option value="${p}">Piso ${p}</option>`));
+  [...new Set(U.map(u=>u.banos))].sort().forEach(b=>$("#fBanos").insertAdjacentHTML("beforeend",`<option value="${b}">${b}</option>`));
+  const ps=U.map(u=>u.precio), min=Math.floor(Math.min(...ps)/5000)*5000, max=Math.ceil(Math.max(...ps)/5000)*5000;
+  const r=$("#fPrecio"); r.min=min; r.max=max; r.step=5000; r.value=max; F.precio=max;
+  const pinta=()=>{ F.precio=+r.value; $("#pVal").textContent=+r.value>=max?"Sin límite":usd(+r.value); };
+  pinta(); r.addEventListener("input",()=>{ pinta(); render(); });
+  [["#fPiso","piso"],["#fBanos","banos"],["#fBalcon","balcon"],["#fParq","parq"],["#fOrden","orden"]].forEach(([s,k])=>$(s).addEventListener("change",e=>{F[k]=e.target.value;render();}));
+  $("#fDisp").addEventListener("change",e=>{F.disp=e.target.checked;render();});
+  $("#btnMas").addEventListener("click",e=>{ const f=$("#filtros"), a=f.classList.toggle("abierto");
+    e.target.setAttribute("aria-expanded",a); e.target.textContent=a?"− Menos filtros":"+ Más filtros"; });
+  render();
+}).catch(()=>{ $("#resumen").textContent="No se pudo leer unidades.csv."; });
+</script>
+</body>
+</html>

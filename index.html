@@ -1,444 +1,525 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
+<base href="/cotizador/">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>La Vuelta, de Puertas del Sol — Tu siguiente oportunidad está a la vuelta</title>
-<meta name="description" content="La Vuelta, un proyecto de Grupo León Vintimilla en alianza con Construlein León Iñiguez en Cuenca. Departamentos, plaza comercial y amenidades: todo lo que quieres, más cerca de lo que imaginas.">
-<meta property="og:title" content="La Vuelta, de Puertas del Sol">
-<meta property="og:description" content="Todo lo que quieres, más cerca de lo que imaginas. Muy pronto en Cuenca.">
-<meta property="og:image" content="https://edificiolavuelta.com/og.jpg">
-<meta property="og:url" content="https://edificiolavuelta.com">
-<meta property="og:type" content="website">
-<meta name="theme-color" content="#FAEDE1">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%238C2628'/><text x='50' y='72' font-size='62' font-family='Arial' font-weight='700' fill='%23FAEDE1' text-anchor='middle'>V</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#faede1">
+<title>Cotizador · La Vuelta</title>
+<script src="plan.js"></script>
 <style>
-:root{
-  --crema:#FAEDE1; --crema-2:#F3E2D2; --vino:#8C2628; --vino-hondo:#6A1A1C;
-  --cielo:#529BC6; --bruma:#AEC5C9; --olivo:#55705A; --tinta:#131614; --gris:#5E5652;
-  --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
-  --texto:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
+:root{--vino:#8c2628;--crema:#faede1;--celeste:#b1c3c7;--azul:#4a94c4;--texto:#3b2b2b;--gris:#6f5f5f;--linea:#e3cfc2;--mono:"Courier New",Courier,monospace;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--crema);color:var(--texto);font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+
+/* ---------- Panel del asesor (solo pantalla) ---------- */
+.panel{max-width:860px;margin:0 auto;padding:20px 16px 8px}
+.panel header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.panel header img{width:110px}
+.panel .links{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.panel .ver{font-size:14px;font-weight:bold;color:var(--vino);text-decoration:none;text-align:right}
+.panel h1{font-family:var(--mono);font-size:15px;letter-spacing:3px;color:var(--vino);margin:0;text-transform:uppercase}
+fieldset{border:0;border-top:1.5px solid var(--vino);margin:0 0 16px;padding:10px 0 0}
+legend{font-family:var(--mono);font-weight:bold;letter-spacing:3px;color:var(--vino);font-size:13px;padding-right:8px;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+label{display:block;font-size:12px;color:var(--gris);font-weight:bold;margin-bottom:4px}
+input,select,textarea{width:100%;font:16px Arial,Helvetica,sans-serif;padding:10px;border:1px solid #d8c3b4;border-radius:8px;background:#fff;color:var(--texto)}
+textarea{min-height:60px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--azul);outline-offset:1px}
+.resumen{font-size:14px;line-height:1.6;background:#fff;border-radius:8px;padding:10px 12px;margin-top:10px}
+.resumen b{color:var(--vino)}
+.error{color:#b00020;font-weight:bold}
+.acciones{position:sticky;bottom:0;background:var(--crema);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));border-top:1px solid var(--linea);display:flex;gap:10px;justify-content:center;z-index:5}
+button{font:bold 15px Arial,Helvetica,sans-serif;border:0;border-radius:10px;padding:13px 20px;cursor:pointer}
+.primario{background:var(--vino);color:var(--crema)}
+.secundario{background:var(--celeste);color:#fff}
+button:focus-visible{outline:3px solid var(--azul);outline-offset:2px}
+.modal{position:fixed;inset:0;background:rgba(59,43,43,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+.modal[hidden]{display:none}
+.modal-caja{background:var(--crema);border-radius:14px;padding:20px;max-width:340px;width:100%;display:flex;flex-direction:column;gap:10px;text-align:center;font-size:15px}
+.modal-caja p{margin:0}
+.modal-caja .paso{font-size:13.5px;color:var(--gris);line-height:1.4}
+.enlace{background:none;color:var(--gris);font-weight:normal}
+button:disabled{opacity:.6}
+.aviso{font-size:12px;color:var(--gris);margin:4px 0 0}
+
+/* ---------- Vista previa ---------- */
+.preview-wrap{max-width:860px;margin:0 auto;padding:8px 16px 20px}
+.preview-wrap h2{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--gris);margin:6px 0 10px;text-transform:uppercase}
+.escala{transform-origin:top left}
+.hoja{width:794px;height:1058px;background:var(--crema);position:relative;overflow:hidden;box-shadow:0 2px 14px rgba(59,43,43,.18);margin-bottom:18px}
+.hoja .cuerpo{padding:30px 40px 0}
+.pie{position:absolute;left:0;right:0;bottom:0;background:var(--celeste);font-family:var(--mono);letter-spacing:1px;font-size:9.5px;font-weight:bold;color:#fff;text-transform:uppercase;text-align:center;padding:10px 20px}
+.mono{font-family:var(--mono);letter-spacing:3px;text-transform:uppercase}
+.ast{color:var(--azul);font-weight:bold;letter-spacing:2px}
+.titulo{font-family:var(--mono);letter-spacing:4px;font-size:14px;font-weight:bold;color:var(--vino);text-transform:uppercase;padding-bottom:4px;border-bottom:1.5px solid var(--vino)}
+.fila{display:flex;gap:22px}
+.col-i{flex:0 0 56%}.col-d{flex:1;min-width:0}
+.caja{background:var(--celeste);color:#fff;padding:12px 16px}
+.dato{display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:12.5px}
+.dato .l{font-family:var(--mono);letter-spacing:1.5px;font-size:10.5px;font-weight:bold;text-transform:uppercase;color:var(--gris);flex:0 0 auto}
+.dato .v{text-align:right;white-space:nowrap}
+
+.dato.izq .v{text-align:left;flex:1}
+.dato.izq .l{width:80px}
+.dato.sep{border-top:1px solid var(--linea)}
+.dato.sub .l{padding-left:10px}
+.stats{display:flex;gap:8px;margin-top:8px}
+.stat{flex:1;background:var(--celeste);text-align:center;padding:7px 4px;color:#fff}
+.stat.badge{background:var(--vino);color:var(--crema);flex:1.15}
+.stat .sl{font-family:var(--mono);letter-spacing:1px;font-size:10px;font-weight:bold;text-transform:uppercase}
+.stat .sv{font-size:18px;font-weight:bold;padding-top:3px}
+.areas .stat{background:transparent;border:1.5px solid var(--celeste);color:var(--texto)}
+.areas .stat .sl{color:var(--gris)}
+.areas .stat .sv{font-size:16px}
+.areas .stat.total{background:var(--azul);border-color:var(--azul);color:#fff;flex:1.25}
+.areas .stat.total .sl{color:#fff}
+.areas .stat.total .sv{font-size:20px}
+.dato.desc .v{color:#6b7a4f;font-weight:bold}
+.dato.final{background:#fff;padding:5px 6px;margin-top:2px}
+.dato.final .l{color:var(--vino)}
+.dato.final .v{font-weight:bold;font-size:13.5px}
+[hidden]{display:none!important}
+.precio-desc{background:#6b7a4f;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px}
+.precio-desc .mono{font-size:8.5px;font-weight:bold;letter-spacing:1px}
+.precio-desc b{font-size:15px}
+.precio{background:var(--vino);color:var(--crema);padding:12px 10px;text-align:center;margin-top:8px}
+.precio .sv{font-size:23px;font-weight:bold;padding-top:4px}
+.plano{text-align:center}
+.plano img{max-width:100%;max-height:330px;display:inline-block}
+.letras{font-style:italic;color:var(--gris);padding-top:8px;font-size:12.5px}
+.nota{font-family:var(--mono);font-size:9px;color:var(--gris);letter-spacing:1px;line-height:1.5}
+.galeria{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.galeria.dos{grid-template-columns:1fr 1fr}
+.galeria figure{margin:0}
+.galeria .ancho{grid-column:span 2}
+.galeria img{display:block;width:100%;height:auto}
+.galeria figcaption{font-family:var(--mono);letter-spacing:2px;font-size:9.5px;font-weight:bold;text-transform:uppercase;color:var(--vino);padding-top:4px}
+
+@media print{
+  @page{size:A4;margin:0}
+  .panel,.acciones,.preview-wrap h2{display:none!important}
+  .preview-wrap{padding:0;max-width:none}
+  .escala{transform:none!important;height:auto!important}
+  .hoja{box-shadow:none;margin:0 auto;width:210mm;height:280mm;page-break-after:always;break-after:page}
+  .hoja:last-child{page-break-after:auto;break-after:auto}
 }
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px);background:var(--crema)}
-body{margin:0;background:var(--crema);color:var(--tinta);font-family:var(--texto);font-size:1.0625rem;line-height:1.6;-webkit-font-smoothing:antialiased}
-img{max-width:100%;height:auto;display:block}
-figure{margin:0}
-a{color:inherit}
-:focus-visible{outline:3px solid var(--cielo);outline-offset:3px;border-radius:4px}
-.envoltura{width:min(1160px,100% - 2.5rem);margin-inline:auto}
-
-/* titulares con la sombra desfasada del logo */
-.titular{font-family:var(--display);font-stretch:75%;font-variation-settings:"wdth" 75;font-weight:800;color:var(--vino);
-  line-height:.98;letter-spacing:-.01em;margin:0;text-shadow:.06em .045em 0 var(--bruma)}
-.estrellas{color:var(--cielo);letter-spacing:.35em;font-size:1rem;line-height:1;user-select:none}
-
-/* Cinta de promoción */
-.cinta{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.35rem .7rem;padding:.7rem 1rem;background:var(--vino);color:var(--crema);text-decoration:none;font-weight:600;font-size:.92rem;text-align:center;line-height:1.3}
-.cinta-ast{color:var(--bruma);letter-spacing:.2em;font-size:.8rem}
-.cinta-cta{text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
-.cinta:hover .cinta-cta{text-decoration-thickness:2px}
-@media (max-width:480px){.cinta{font-size:.84rem;padding:.6rem .8rem;gap:.2rem .5rem}.cinta-ast{display:none}}
-/* Portada */
-.portada{padding:1.1rem 0 0;text-align:center}
-.barra{display:flex;justify-content:space-between;align-items:center;gap:1rem;text-align:left}
-.barra .lugar{font-size:.9rem;color:var(--gris);line-height:1.25}
-.barra-der{display:flex;align-items:center;gap:.5rem}
-.idioma{display:inline-flex;border:0;padding:3px;border-radius:999px;background:var(--crema-2);box-shadow:inset 0 0 0 1.5px rgba(140,38,40,.3);cursor:pointer;font:600 .8rem/1 var(--texto)}
-.idioma span{padding:.42rem .55rem;border-radius:999px;color:var(--gris)}
-html[lang="es"] .idioma [data-l="es"],html[lang="en"] .idioma [data-l="en"]{background:var(--vino);color:var(--crema)}
-.pildora{white-space:nowrap;font-weight:600;font-size:.92rem;text-decoration:none;color:var(--vino);box-shadow:inset 0 0 0 1.5px var(--vino);padding:.5rem 1rem;border-radius:999px}
-.pildora:hover{background:var(--vino);color:var(--crema)}
-.portada .logo{width:min(620px,92%);margin:clamp(2rem,6vw,3.5rem) auto 1.5rem}
-.portada h1{font-family:var(--display);font-weight:600;font-size:clamp(1.35rem,3.6vw,2.1rem);line-height:1.2;margin:0 auto 1.75rem;max-width:24ch}
-.acciones{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center}
-.boton{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;font:600 1rem/1 var(--texto);text-decoration:none;border:0;cursor:pointer;padding:1rem 1.45rem;border-radius:999px;background:var(--vino);color:var(--crema)}
-.boton:hover{background:var(--vino-hondo)}
-.boton svg{width:20px;height:20px;flex:none}
-.boton.suave{background:transparent;color:var(--vino);box-shadow:inset 0 0 0 1.5px var(--vino)}
-.boton.suave:hover{background:var(--crema-2)}
-.fachada{margin-top:clamp(2.5rem,6vw,4rem)}
-.fachada img{width:100%;height:clamp(320px,62vw,760px);object-fit:cover;object-position:50% 62%}
-.fachada figcaption{display:flex;justify-content:space-between;gap:1rem;padding:.8rem 0;font-size:.9rem;color:var(--gris)}
-@media (prefers-reduced-motion:no-preference){
-  .portada .logo,.portada h1,.portada .acciones{animation:entra .9s cubic-bezier(.2,.7,.2,1) both}
-  .portada h1{animation-delay:.12s}.portada .acciones{animation-delay:.24s}
-  @keyframes entra{from{opacity:0;transform:translateY(12px)}}
-}
-
-/* Concepto */
-.concepto{padding:clamp(4rem,10vw,7.5rem) 0}
-.concepto .rejilla{display:grid;gap:3rem;align-items:center}
-@media (min-width:880px){.concepto .rejilla{grid-template-columns:1.1fr .9fr;gap:4rem}}
-.concepto .titular{font-size:clamp(2.4rem,7vw,4.6rem);margin:1rem 0 2rem;max-width:13ch}
-.pasos{list-style:none;margin:0 0 2rem;padding:0;display:grid;gap:.3rem;font-family:var(--display);font-size:clamp(1.25rem,3vw,1.7rem);line-height:1.3}
-.pasos li:nth-child(2){padding-left:1.4em}.pasos li:nth-child(3){padding-left:2.8em}
-.concepto p{color:var(--gris);max-width:56ch;margin:0}
-.concepto .foto img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:6px}
-
-/* Barrio */
-.barrio{background:var(--vino);color:var(--crema);padding:clamp(4rem,9vw,7rem) 0}
-.barrio .titular{color:var(--crema);text-shadow:.06em .045em 0 var(--vino-hondo);font-size:clamp(2.1rem,5.6vw,3.8rem);max-width:17ch;margin:0 0 2.5rem}
-.momentos{list-style:none;margin:0 0 3rem;padding:0;border-top:2px solid var(--crema);max-width:720px}
-.momentos li{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:1rem 0;border-bottom:1px solid rgba(250,237,225,.3);font-family:var(--display);font-size:clamp(1.15rem,2.6vw,1.5rem)}
-.momentos li span:last-child{font-family:var(--texto);font-size:.95rem;font-weight:600;color:var(--bruma);white-space:nowrap}
-.plaza{display:grid;gap:1rem}
-.plaza img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px}
-.barrio .nota{margin:1.5rem 0 0;max-width:62ch;opacity:.9}
-
-/* Amenidades */
-.amenidades{padding:clamp(4rem,10vw,7.5rem) 0}
-.amenidades .cabeza{display:grid;gap:1rem;margin-bottom:2.5rem;max-width:60ch}
-.amenidades .titular{font-size:clamp(2.4rem,7vw,4.6rem)}
-.amenidades .cabeza p{margin:0;color:var(--gris)}
-.galeria{display:grid;gap:1.75rem 1.25rem}
-@media (min-width:760px){.galeria{grid-template-columns:1fr 1fr}.galeria .ancha{grid-column:1/-1}}
-.pieza{margin:0}
-.pieza button{all:unset;cursor:zoom-in;display:block;width:100%;border-radius:6px;overflow:hidden}
-.pieza button:focus-visible{outline:3px solid var(--cielo);outline-offset:3px}
-.pieza img{width:100%;aspect-ratio:3/2;object-fit:cover;transition:transform .5s ease}
-.pieza.ancha img{aspect-ratio:16/8}
-@media (hover:hover){.pieza button:hover img{transform:scale(1.025)}}
-.pieza figcaption{padding-top:.8rem;display:grid;gap:.15rem}
-.pieza strong{font-family:var(--display);font-size:1.3rem;font-weight:700;color:var(--vino)}
-.pieza span{color:var(--gris);font-size:.98rem}
-
-.extras{display:grid;gap:1rem;margin-top:1.75rem}
-.extra{display:flex;gap:1.1rem;align-items:center;padding:1.4rem 1.5rem;border-radius:6px;background:var(--crema-2);box-shadow:inset 0 0 0 1.5px rgba(140,38,40,.25)}
-.extra svg{width:44px;height:44px;flex:none;fill:none;stroke:var(--vino);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.extra div{display:grid;gap:.1rem}
-.extra strong{font-family:var(--display);font-size:1.3rem;font-weight:700;color:var(--vino)}
-.extra span{color:var(--gris);font-size:.98rem}
-dialog{border:0;padding:0;background:transparent;max-width:min(1400px,96vw);max-height:92vh}
-dialog::backdrop{background:rgba(19,22,20,.88)}
-dialog img{max-height:84vh;width:auto;margin:auto;border-radius:4px}
-dialog p{color:var(--crema);text-align:center;margin:.75rem 0 0;font-family:var(--display);font-size:1.15rem}
-dialog .cerrar{position:fixed;top:calc(1rem + env(safe-area-inset-top,0px));right:1rem;width:44px;height:44px;border-radius:50%;border:0;background:var(--crema);color:var(--tinta);font-size:1.6rem;line-height:1;cursor:pointer}
-
-/* Ubicación */
-.ubicacion{padding:0 0 clamp(4rem,10vw,7.5rem)}
-.ubicacion .cabeza{display:grid;gap:1rem;margin-bottom:2rem;max-width:60ch}
-.ubicacion .titular{font-size:clamp(2.2rem,6.4vw,4.2rem)}
-.ubicacion .cabeza p{margin:0;color:var(--gris)}
-.mapa{display:block;border-radius:14px;box-shadow:0 0 0 1.5px rgba(140,38,40,.25);overflow:hidden;background:#F6E6D8}
-.mapa-svg{display:block;width:100%;height:auto}
-.mapa:hover .ruta{stroke-dashoffset:-20}
-.anillo{fill:none;stroke:var(--bruma);stroke-width:2.5;stroke-dasharray:4 7}
-.anillo-txt{font:600 17px var(--texto);fill:#7FA3AB}
-.ruta{fill:none;stroke:var(--vino);stroke-width:3;stroke-dasharray:2 9;stroke-linecap:round;opacity:.75;transition:stroke-dashoffset .6s}
-.punto{fill:var(--crema);stroke:var(--vino);stroke-width:4.5}
-.lugar{font:700 21px var(--display);fill:var(--vino)}
-.tiempo{font:500 17px var(--texto);fill:var(--gris)}
-.edificio{font:800 25px var(--display);fill:var(--vino);font-stretch:75%}
-.estrellas-mapa{font-size:15px;fill:var(--cielo);letter-spacing:4px}
-.norte path{fill:var(--tinta);opacity:.7}.norte text{font:700 15px var(--texto);fill:var(--tinta);opacity:.7}
-.nota-mapa{font:500 13px var(--texto);fill:var(--gris);opacity:.8}
-.etq text{paint-order:stroke;stroke:#F6E6D8;stroke-width:6px;stroke-linejoin:round}
-.etq .lugar{font-size:24px}.etq .tiempo{font-size:18px}
-@media (max-width:640px){.etq .lugar{font-size:30px}.etq .tiempo{font-size:23px}.edificio{font-size:34px}.anillo-txt{font-size:22px}.nota-mapa{font-size:19px}}
-.acciones-mapa{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem}
-/* Equipo */
-.equipo{background:var(--crema-2);padding:clamp(4rem,10vw,7.5rem) 0;text-align:center}
-.equipo .titular{font-size:clamp(2.2rem,6vw,4rem);margin-bottom:1.25rem}
-.intro-equipo{color:var(--gris);max-width:52ch;margin:0 auto clamp(2.5rem,6vw,3.5rem)}
-.creditos{display:inline-block;position:relative;padding:2.2rem 1rem 0;font-family:var(--texto);color:var(--tinta)}
-.creditos p{margin:0}
-.un-proyecto{position:absolute;left:-.5rem;top:1.6rem;transform:rotate(-18deg);transform-origin:left bottom;color:var(--vino);font-size:clamp(.75rem,2.4vw,.95rem);letter-spacing:.2em;text-transform:uppercase}
-.grupo{font-size:clamp(1.6rem,6vw,2.6rem);line-height:1.15;letter-spacing:.09em;text-transform:uppercase;font-weight:500}
-.rol{margin-top:.4rem!important;color:#B3AAA4;font-size:clamp(.72rem,2.3vw,.95rem);letter-spacing:.32em;text-transform:uppercase}
-.con{margin:2rem 0 1.4rem!important;color:var(--vino);letter-spacing:.2em;text-transform:uppercase;font-size:.95rem}
-.socio{font-size:clamp(1.8rem,6.6vw,2.8rem);font-weight:600;letter-spacing:.03em;text-transform:uppercase;line-height:1.1}
-.rol2{margin-top:.5rem!important;color:#9E958F;font-size:clamp(.95rem,2.8vw,1.2rem);font-weight:500;text-transform:uppercase}
-/* Registro */
-.registro{background:var(--vino);color:var(--crema);padding:clamp(4rem,9vw,7rem) 0}
-.registro .rejilla{display:grid;gap:2.5rem}
-@media (min-width:880px){.registro .rejilla{grid-template-columns:1fr 1fr;align-items:center}}
-.registro .titular{color:var(--crema);text-shadow:.06em .045em 0 var(--vino-hondo);font-size:clamp(2.4rem,6vw,4.2rem);max-width:12ch;margin:0 0 1rem}
-.registro .rejilla>div>p{margin:0 0 1.5rem;opacity:.9;max-width:44ch}
-.promo{background:var(--crema);color:var(--tinta);border-radius:14px;padding:1.3rem 1.4rem;margin:0 0 1.25rem;box-shadow:inset 0 0 0 2px var(--cielo)}
-.promo-tit{margin:0 0 .35rem!important;font-family:var(--display);font-weight:800;font-size:1.35rem;line-height:1.15;color:var(--vino)}
-.promo-tit::before{content:"✱✱✱";display:block;color:var(--cielo);font-size:.8rem;letter-spacing:.25em;margin-bottom:.35rem}
-.promo-txt{margin:0 0 1rem!important;color:var(--gris)!important;opacity:1!important;font-size:.98rem}
-.boton.claro{background:transparent;color:var(--crema);box-shadow:inset 0 0 0 1.5px rgba(250,237,225,.7)}
-.boton.claro:hover{background:rgba(250,237,225,.12)}
-form{display:grid;gap:1rem;background:var(--crema);color:var(--tinta);padding:1.6rem;border-radius:18px}
-label{display:grid;gap:.35rem;font-weight:600;font-size:.95rem}
-input,select{font:inherit;font-weight:400;padding:.85rem 1rem;border:1.5px solid #DCC8B8;border-radius:12px;background:#fff;color:var(--tinta);width:100%}
-input:focus,select:focus{border-color:var(--vino);outline:none;box-shadow:0 0 0 3px rgba(140,38,40,.18)}
-.aviso{font-size:.85rem;color:var(--gris);margin:0}
-.error{color:var(--vino);font-size:.9rem;font-weight:600;margin:0;min-height:1.2em}
-
-footer{padding:3rem 0 5.5rem;text-align:center;color:var(--gris);font-size:.9rem}
-footer .logo{width:200px;margin:0 auto 1.25rem}
-footer p{margin:.2rem 0}
-
-.flotante{position:fixed;right:1rem;bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:10;width:58px;height:58px;border-radius:50%;background:#25D366;color:#fff;display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.25)}
-.flotante svg{width:30px;height:30px}
+#fpP .dato .l{white-space:normal;flex:1 1 auto;min-width:0;line-height:1.35}
 </style>
 </head>
 <body>
-<a class="cinta js-wa-desc" href="#" target="_blank" rel="noopener">
-  <span class="cinta-ast" aria-hidden="true">✱✱✱</span>
-  <span data-en="Special discounts for early payment">Descuentos especiales por pago anticipado</span>
-  <span class="cinta-cta" data-en="Ask us">Consultar</span>
-</a>
 
+<div class="panel">
+  <header><img src="img/logo.png" alt="La Vuelta"><h1>Cotizador</h1><span class="links"><a class="ver" id="verDisp" href="explorar.html">Ver disponibilidad →</a><a class="ver" id="verCalc" href="calculadora.html">Calculadora →</a></span></header>
 
-<header class="portada">
-  <div class="envoltura barra">
-    <span class="lugar">Puertas del Sol, Cuenca</span>
-    <div class="barra-der"><button type="button" class="idioma" id="idioma" aria-label="English version"><span data-l="es">ES</span><span data-l="en">EN</span></button><a class="pildora" href="#registro" data-en="Get info">Quiero información</a></div>
-  </div>
-  <div class="envoltura">
-    <img class="logo" src="logo.png" alt="La Vuelta, de Puertas del Sol" width="1480" height="872">
-    <h1 data-en="Your next opportunity is just around the corner.">Tu siguiente oportunidad está a la vuelta.</h1>
-    <div class="acciones">
-      <a class="boton js-wa" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg><span data-en="Message us on WhatsApp">Escríbenos por WhatsApp</span></a>
-      <a class="boton suave" href="brochure-la-vuelta.pdf" download="Brochure La Vuelta.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg><span data-en="Download brochure (Spanish)">Descargar brochure</span></a>
+  <fieldset>
+    <legend>Cliente</legend>
+    <div class="grid">
+      <div><label for="cNombre">Nombre y apellido</label><input id="cNombre" autocomplete="off"></div>
+      <div><label for="cCel">Celular</label><input id="cCel" type="tel" inputmode="tel"></div>
+      <div><label for="cCorreo">Correo</label><input id="cCorreo" type="email" inputmode="email"></div>
+      <div><label for="cCi">Cédula (opcional)</label><input id="cCi" inputmode="numeric"></div>
     </div>
-  </div>
-  <figure class="fachada">
-    <img src="fachada.webp" alt="Render de la fachada del edificio La Vuelta" width="2000" height="1500" fetchpriority="high">
-    <figcaption class="envoltura"><span data-en="Building façade">Fachada del edificio</span><span data-en="Coming soon">Muy pronto</span></figcaption>
-  </figure>
-</header>
+  </fieldset>
 
-<main>
-  <section class="concepto" id="concepto">
-    <div class="envoltura rejilla">
-      <div>
-        <div class="estrellas" aria-hidden="true">✱✱✱</div>
-        <h2 class="titular" data-en="A place comes alive when life happens in it.">Un lugar cobra sentido cuando la vida sucede en él.</h2>
-        <ul class="pasos">
-          <li data-en="People who meet.">Personas que se encuentran.</li>
-          <li data-en="Stories that begin.">Historias que empiezan.</li>
-          <li data-en="Spaces that become part of your everyday life.">Espacios que se convierten en parte de tu día a día.</li>
-        </ul>
-        <p data-en="We are building a place designed to be close to what matters. A project for those looking for a space of their own, and for an opportunity to keep growing.">Estamos construyendo un lugar pensado para estar cerca de lo que importa. Un proyecto que nace para quienes buscan su propio espacio, pero también una oportunidad para seguir creciendo.</p>
-      </div>
-      <div class="foto"><img src="cafe.webp" alt="Dos personas en una mesa de café frente a un muro con el logo de La Vuelta" width="1192" height="1484" loading="lazy"></div>
+  <fieldset>
+    <legend>Departamento</legend>
+    <div class="grid">
+      <div><label for="piso">Piso</label><select id="piso"></select></div>
+      <div><label for="unidad">Unidad</label><select id="unidad"></select></div>
     </div>
-  </section>
+    <div class="resumen" id="resumenUnidad">Cargando unidades…</div>
+  </fieldset>
 
-  <section class="barrio">
-    <div class="envoltura">
-      <h2 class="titular" data-en="What if your everyday life could be closer to everything you enjoy?">¿Y si tu día a día pudiera estar más cerca de todo lo que disfrutas?</h2>
-      <ul class="momentos">
-        <li><span data-en="Heading out for coffee">Salir por un café</span><span data-en="around the corner">a la vuelta</span></li>
-        <li><span data-en="Meeting a friend">Encontrarte con alguien</span><span data-en="around the corner">a la vuelta</span></li>
-        <li><span data-en="Walking your neighborhood">Caminar por tu barrio</span><span data-en="around the corner">a la vuelta</span></li>
-      </ul>
-      <div class="plaza">
-        <img src="plaza-2.webp" alt="Render de los locales comerciales en planta baja con parqueadero de bicicletas" width="1600" height="949" loading="lazy">
-      </div>
-      <p class="nota" data-en="A ground-floor commercial plaza with spaces designed for cafés, ice cream shops and bakeries. More closeness, more convenience and more life around you.">Una plaza comercial en planta baja, con espacios pensados para cafés, heladerías y panaderías. Más cercanía, más practicidad y más vida alrededor.</p>
+  <fieldset>
+    <legend>Forma de pago</legend>
+    <div class="grid">
+      <div><label for="esquema">Esquema de pago</label><select id="esquema"><option value="estandar">Estándar 5% · 25% · 70%</option><option value="p">Plan personalizado</option></select></div>
+      <div class="bP" hidden><label for="pEnt">Entrada %</label><input id="pEnt" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="5"></div>
+      <div class="bP" hidden><label for="pAnt">Pago anticipado $</label><input id="pAnt" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
+      <div class="bP" hidden><label for="pN">N° de cuotas</label><input id="pN" type="number" inputmode="numeric" min="0" step="1" value="30"></div>
+      <div class="bP" hidden><label for="pCuo">Total en cuotas $</label><input id="pCuo" type="text" inputmode="decimal" autocomplete="off"></div>
+      <div><label for="vigencia">Vigencia (días)</label><input id="vigencia" type="number" inputmode="numeric" min="1" value="15"></div>
     </div>
-  </section>
+    <div class="resumen" id="resumenPago"></div>
+    <div style="margin-top:10px"><label for="obs">Observaciones</label><textarea id="obs"></textarea></div>
+  </fieldset>
 
-  <section class="amenidades" id="amenidades">
-    <div class="envoltura">
-      <div class="cabeza">
-        <div class="estrellas" aria-hidden="true">✱✱✱</div>
-        <h2 class="titular" data-en="Amenities">Amenidades</h2>
-        <p data-en="Shared spaces to enjoy without leaving home. Tap any image to see it in full.">Espacios compartidos para disfrutar sin salir de casa. Toca cualquier imagen para verla completa.</p>
-      </div>
-      <div class="galeria">
-        <figure class="pieza ancha"><button type="button" data-src="bar.webp" aria-label="Ampliar: bar en la terraza"><img src="bar.webp" alt="Render del bar en la terraza al atardecer, con vista a las montañas" width="1450" height="1077" loading="lazy"></button>
-          <figcaption><strong data-en="Rooftop bar">Bar en la terraza</strong><span data-en="Sunsets with views of the mountains of Cuenca.">Atardeceres con vista a las montañas de Cuenca.</span></figcaption></figure>
-        <figure class="pieza"><button type="button" data-src="teppanyaki.webp" aria-label="Ampliar: zona teppanyaki"><img src="teppanyaki.webp" alt="Render de la zona teppanyaki con barra y mesas" width="1460" height="1034" loading="lazy"></button>
-          <figcaption><strong data-en="Teppanyaki area">Zona teppanyaki</strong><span data-en="Griddle cooking to share with friends.">Cocina a la plancha para compartir con amigos.</span></figcaption></figure>
-        <figure class="pieza"><button type="button" data-src="lobby.webp" aria-label="Ampliar: lobby"><img src="lobby.webp" alt="Render del lobby con recepción y sala de espera" width="1500" height="1045" loading="lazy"></button>
-          <figcaption><strong>Lobby</strong><span data-en="A warm reception to welcome you every day.">Una recepción cálida para recibirte cada día.</span></figcaption></figure>
-        <figure class="pieza"><button type="button" data-src="ninos.webp" aria-label="Ampliar: zona de niños"><img src="ninos.webp" alt="Render de la zona de juegos infantiles con columpios y resbaladera" width="1700" height="847" loading="lazy"></button>
-          <figcaption><strong data-en="Kids&#x27; area">Zona de niños</strong><span data-en="Outdoor play, surrounded by gardens.">Juegos al aire libre, rodeados de jardín.</span></figcaption></figure>
-        <figure class="pieza"><button type="button" data-src="pet.webp" aria-label="Ampliar: zona pet friendly"><img src="pet.webp" alt="Render de la zona pet friendly con césped, ducha y rampa" width="1600" height="955" loading="lazy"></button>
-          <figcaption><strong data-en="Pet-friendly area">Zona pet friendly</strong><span data-en="A space for your pet, with a wash station and play area.">Un espacio para tu mascota, con ducha y área de juego.</span></figcaption></figure>
-        <figure class="pieza"><button type="button" data-src="coworking.webp" aria-label="Ampliar: coworking"><img src="coworking.webp" alt="Render del coworking en la terraza, con sala de reuniones y mesas al aire libre" width="1600" height="893" loading="lazy"></button>
-          <figcaption><strong>Coworking</strong><span data-en="Meeting room and terrace to work with mountain views.">Sala de reuniones y terraza para trabajar con vista a las montañas.</span></figcaption></figure>
-        <figure class="pieza"><button type="button" data-src="gimnasio.webp" aria-label="Ampliar: gimnasio"><img src="gimnasio.webp" alt="Render del gimnasio con máquinas, pesas y ventanales hacia el jardín" width="1600" height="900" loading="lazy"></button>
-          <figcaption><strong data-en="Gym">Gimnasio</strong><span data-en="Natural light and garden views to train close to home.">Luz natural y vista al jardín para entrenar cerca de casa.</span></figcaption></figure>
-        <figure class="pieza ancha"><button type="button" data-src="plaza-1.webp" aria-label="Ampliar: plaza central"><img src="plaza-1.webp" alt="Render de la plaza central con árboles, mesas y locales comerciales" width="1600" height="947" loading="lazy"></button>
-          <figcaption><strong data-en="Central plaza">Plaza central</strong><span data-en="An open space with trees and tables to meet your neighbors.">Un espacio abierto con árboles y mesas, para encontrarte con tus vecinos.</span></figcaption></figure>
-      </div>
+  <fieldset>
+    <legend>Asesor</legend>
+    <div class="grid">
+      <div><label for="aNombre">Nombre</label><input id="aNombre"></div>
+      <div><label for="aCel">Celular</label><input id="aCel" type="tel" inputmode="tel"></div>
+      <div><label for="aCorreo">Correo</label><input id="aCorreo" type="email" inputmode="email"></div>
     </div>
-  </section>
+    <p class="aviso">Tus datos de asesor quedan guardados en este dispositivo.</p>
+  </fieldset>
+</div>
 
-  <section class="ubicacion" id="ubicacion">
-    <div class="envoltura">
-      <div class="cabeza">
-        <div class="estrellas" aria-hidden="true">✱✱✱</div>
-        <h2 class="titular" data-en="Everything is just around the corner">Todo te queda a la vuelta</h2>
-        <p data-en="In Puertas del Sol, Cuenca: steps from the university, the stadium, Hotel Oro Verde, banks, cafés and a supermarket. Tap the map for directions.">En Puertas del Sol, Cuenca: a pasos de la universidad, el estadio, el Hotel Oro Verde, bancos, cafés y supermercado. Toca el mapa para ver cómo llegar.</p>
-      </div>
-      <a class="mapa" href="https://maps.app.goo.gl/m7TCEkaeVgLNcARX9" target="_blank" rel="noopener" aria-label="Abrir la ubicación de La Vuelta en Google Maps">
-        <svg class="mapa-svg" viewBox="0 0 780 500" role="img" aria-label="Mapa ilustrativo de la ubicación de La Vuelta: a 2 minutos caminando del Campus Balzay de la Universidad de Cuenca, 6 del Estadio Cazhapata, 9 del Hotel Oro Verde y del Banco Pichincha, 11 de Plaza Soleil, 14 del Parque Lineal y a 4 minutos en auto del Supermaxi.">
-  <defs>
-    <pattern id="manzanas" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(-14)">
-      <rect x="4" y="4" width="32" height="32" rx="5" fill="#EFDCCB"/>
-    </pattern>
-    <clipPath id="marco"><rect width="780" height="500" rx="14"/></clipPath>
-  </defs>
-  <g clip-path="url(#marco)">
-    <rect width="780" height="500" fill="#F6E6D8"/>
-    <rect width="780" height="500" fill="url(#manzanas)"/>
-    <circle class="anillo" cx="100" cy="300" r="286.8"/>
-    <circle class="anillo" cx="100" cy="300" r="143.4"/>
-    <text class="anillo-txt" x="100" y="473" text-anchor="middle">5 min</text>
-  </g>
-  <path class="ruta" d="M100 300 Q192.9 311.4 262.0 374.6"/><path class="ruta" d="M100 300 Q252.0 249.2 405.3 296.0"/><path class="ruta" d="M100 300 Q289.5 215.3 493.0 256.4"/><path class="ruta" d="M100 300 Q169.9 186.3 292.9 134.3"/><path class="ruta" d="M100 300 Q146.9 173.6 258.4 97.9"/><path class="ruta" d="M100 300 Q381.7 126.0 712.1 147.8"/><circle class="punto" cx="125.3" cy="252.89999999999998" r="10"/><circle class="punto" cx="262.0" cy="374.6" r="10"/><circle class="punto" cx="405.3" cy="296.0" r="10"/><circle class="punto" cx="493.0" cy="256.4" r="10"/><circle class="punto" cx="292.9" cy="134.3" r="10"/><circle class="punto" cx="258.4" cy="97.9" r="10"/><circle class="punto" cx="712.1" cy="147.8" r="10"/><g class="etq"><text class="lugar" x="280" y="88" text-anchor="start">Banco Pichincha</text><text class="tiempo" x="280" y="88" dy="1.25em" text-anchor="start" data-en="9 min walk">9 min caminando</text></g><g class="etq"><text class="lugar" x="315" y="172" text-anchor="start">Hotel Oro Verde</text><text class="tiempo" x="315" y="172" dy="1.25em" text-anchor="start" data-en="9 min walk">9 min caminando</text></g><g class="etq"><text class="lugar" x="764" y="98" text-anchor="end">Supermaxi</text><text class="tiempo" x="764" y="98" dy="1.25em" text-anchor="end" data-en="4 min drive">4 min en auto</text></g><g class="etq"><text class="lugar" x="147.3" y="248.89999999999998" text-anchor="start" data-en="Balzay Univ. Campus">La U, Campus Balzay</text><text class="tiempo" x="147.3" y="248.89999999999998" dy="1.25em" text-anchor="start" data-en="2 min walk">2 min caminando</text></g><g class="etq"><text class="lugar" x="524" y="238" text-anchor="start" data-en="Linear Park">Parque Lineal</text><text class="tiempo" x="524" y="238" dy="1.25em" text-anchor="start" data-en="14 min walk">14 min caminando</text></g><g class="etq"><text class="lugar" x="427.3" y="316.0" text-anchor="start">Plaza Soleil</text><text class="tiempo" x="427.3" y="316.0" dy="1.25em" text-anchor="start" data-en="11 min walk">11 min caminando</text></g><g class="etq"><text class="lugar" x="284.0" y="384.6" text-anchor="start" data-en="Cazhapata Stadium">Estadio Cazhapata</text><text class="tiempo" x="284.0" y="384.6" dy="1.25em" text-anchor="start" data-en="6 min walk">6 min caminando</text></g>
-  <g transform="translate(100 300)">
-    <circle r="32" fill="#8C2628" opacity=".18"/>
-    <path d="M0 14 C-14 -2 -18 -8 -18 -16 A18 18 0 0 1 18 -16 C18 -8 14 -2 0 14Z" transform="translate(0 -14)" fill="#8C2628"/>
-    <circle cy="-30" r="6.5" fill="#FAEDE1"/>
-  </g>
-  <text class="edificio" x="100" y="350" text-anchor="middle">La Vuelta</text>
-  <text class="estrellas-mapa" x="100" y="374" text-anchor="middle">✱✱✱</text>
-  <text class="nota-mapa" x="762" y="484" text-anchor="end" data-en="Illustrative map. Rings: 5 and 10 min walk.">Mapa ilustrativo. Anillos: 5 y 10 min a pie.</text>
-</svg>
-      </a>
-      <div class="acciones-mapa">
-        <a class="boton" href="https://maps.app.goo.gl/m7TCEkaeVgLNcARX9" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span data-en="Open in Google Maps">Abrir en Google Maps</span></a>
-        <a class="boton suave" href="https://waze.com/ul?ll=-2.892805,-79.036089&amp;navigate=yes" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span data-en="Open in Waze">Abrir en Waze</span></a>
-      </div>
-    </div>
-  </section>
+<div class="preview-wrap">
+  <h2>Vista previa · 2 hojas A4</h2>
+  <div class="escala" id="escala">
 
-  <section class="equipo">
-    <div class="envoltura">
-      <h2 class="titular" data-en="Who is behind it">Quiénes lo hacen</h2>
-      <p class="intro-equipo" data-en="La Vuelta is built on Grupo León Vintimilla&#x27;s track record in design and construction in Cuenca, in partnership with Construlein León Iñiguez, working together to take the project from blueprints to reality.">La Vuelta nace de la trayectoria de Grupo León Vintimilla en diseño y construcción en Cuenca, en alianza con Construlein León Iñiguez, para llevar juntos el proyecto de los planos a la realidad.</p>
-      <div class="creditos">
-        <p class="un-proyecto" data-en="A project by">Un proyecto de</p>
-        <p class="grupo">Grupo<br>León Vintimilla</p>
-        <p class="rol" data-en="Design and construction">Diseño y construcción</p>
-        <p class="con" data-en="in partnership with">en alianza con</p>
-        <p class="socio">Construlein</p>
-        <p class="rol2">León Iñiguez</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="registro" id="registro">
-    <div class="envoltura rejilla">
-      <div>
-        <h2 class="titular" data-en="Be among the first to know.">Sé de los primeros en saber.</h2>
-        <p data-en="Leave your details and we&#x27;ll message you on WhatsApp with floor plans, prices and the launch date before anyone else.">Déjanos tus datos y te escribimos por WhatsApp con planos, precios y fecha de lanzamiento antes que a nadie.</p>
-        <div class="promo">
-          <p class="promo-tit" data-en="Special early payment discounts">Descuentos especiales por pago anticipado</p>
-          <p class="promo-txt" data-en="Ask us about the conditions and secure the best price for your apartment.">Consulta las condiciones y asegura el mejor precio para tu departamento.</p>
-          <a class="boton promo-btn js-wa-desc" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg><span data-en="I want the discount">Quiero el descuento</span></a>
+    <!-- ================= HOJA 1 ================= -->
+    <section class="hoja">
+      <div class="cuerpo">
+        <div class="fila" style="align-items:center">
+          <div style="flex:0 0 48%"><img src="img/logo.png" alt="La Vuelta" style="width:240px"></div>
+          <div class="caja" style="flex:1">
+            <div class="mono" style="font-size:11px;font-weight:bold">Cotización</div>
+            <div style="font-size:19px;letter-spacing:3px;padding:2px 0 8px"># <span data-v="codigo"></span></div>
+            <div class="dato"><span class="l" style="color:#fff">Fecha</span><span class="v" data-v="fecha"></span></div>
+            <div class="dato"><span class="l" style="color:#fff">Vigencia hasta</span><span class="v" data-v="vence"></span></div>
+          </div>
         </div>
-        <a class="boton claro" href="brochure-la-vuelta.pdf" download="Brochure La Vuelta.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg><span data-en="Download brochure (PDF, Spanish)">Descargar brochure (PDF)</span></a>
+
+        <div style="height:14px"></div>
+        <div class="fila">
+          <div class="col-i">
+            <div class="mono" style="font-size:11px;font-weight:bold;color:var(--vino);padding-bottom:6px"><span class="ast">***</span> Un espacio para tu momento <span class="ast">***</span></div>
+            <div style="text-align:justify;line-height:1.45;font-size:12.5px">Desde tu primer departamento hasta un hogar para compartir en familia, La Vuelta ofrece distintas tipologías pensadas para adaptarse a tu forma de vivir. Una ubicación que quieres. Un espacio que puedes hacer tuyo.</div>
+          </div>
+          <div class="col-d">
+            <div class="titulo" style="font-size:11px">Asesor comercial</div>
+            <div class="dato izq"><span class="l">Nombre</span><span class="v" data-v="aNombre"></span></div>
+            <div class="dato izq"><span class="l">Celular</span><span class="v" data-v="aCel"></span></div>
+            <div class="dato izq"><span class="l">E-mail</span><span class="v" data-v="aCorreo"></span></div>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="titulo">Inmueble</div>
+        <div class="stats">
+          <div class="stat badge"><div class="sl">Dpt</div><div class="sv" data-v="unidad"></div></div>
+          <div class="stat"><div class="sl">Piso</div><div class="sv" data-v="piso"></div></div>
+          <div class="stat" style="flex:1.2"><div class="sl">Dormitorios</div><div class="sv" data-v="dorm"></div></div>
+          <div class="stat"><div class="sl">Baños</div><div class="sv" data-v="banos"></div></div>
+          <div class="stat" style="flex:1.25"><div class="sl">Parqueadero</div><div class="sv" data-v="parq"></div></div>
+        </div>
+        <div class="stats areas">
+          <div class="stat"><div class="sl">Área interna</div><div class="sv" data-v="aInt"></div></div>
+          <div class="stat"><div class="sl">Balcón</div><div class="sv" data-v="aBal"></div></div>
+          <div class="stat"><div class="sl">Parqueadero y bodega</div><div class="sv" data-v="aPb"></div></div>
+          <div class="stat total"><div class="sl">Área total</div><div class="sv" data-v="area"></div></div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="fila">
+          <div class="col-i">
+            <div class="titulo">Datos del cliente</div>
+            <div class="dato izq"><span class="l">Nombre</span><span class="v" data-v="cNombre"></span></div>
+            <div class="dato izq"><span class="l">Cédula</span><span class="v" data-v="cCi"></span></div>
+            <div class="dato izq"><span class="l">Celular</span><span class="v" data-v="cCel"></span></div>
+            <div class="dato izq"><span class="l">E-mail</span><span class="v" data-v="cCorreo"></span></div>
+          </div>
+          <div class="col-d">
+            <div class="titulo">Precio</div>
+            <div class="precio"><div class="mono" style="font-size:10px;font-weight:bold">Valor inmueble</div><div class="sv" data-v="precio"></div></div>
+            <div class="precio-desc" id="precioDesc" hidden><span class="mono">Con descuento por pronto pago</span><b data-v="final"></b></div>
+          </div>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="fila">
+          <div class="col-i">
+            <div class="titulo">Forma de pago</div>
+            <div id="fpEst">
+              <div class="dato"><span class="l">Entrada (5%)</span><span class="v" data-v="inicial"></span></div>
+              <div class="dato sep"><span class="l">Durante la construcción (25%)</span><span class="v" data-v="construccion"></span></div>
+              <div class="dato sep"><span class="l">Contra entrega (70%)</span><span class="v" data-v="entrega"></span></div>
+            </div>
+            <div id="fpP" hidden>
+              <div class="dato"><span class="l">Entrada (<span data-v="pEntPct"></span>%)</span><span class="v" data-v="pE"></span></div>
+              <div class="dato sep" id="rowAnt"><span class="l">Pago anticipado</span><span class="v" data-v="pA"></span></div>
+              <div class="dato sep" id="rowCuo"><span class="l">Durante la construcción <span style="font-weight:normal">(<span data-v="pCuoTxt"></span>)</span></span><span class="v" data-v="pC"></span></div>
+              <div class="dato sep"><span class="l">Contra entrega</span><span class="v" data-v="pCE"></span></div>
+              <div class="dato sep desc"><span class="l">Descuento por pronto pago (tasa <span data-v="pTasa"></span>% anual)</span><span class="v" data-v="pD"></span></div>
+              <div class="dato sep final"><span class="l">Precio final con descuento</span><span class="v" data-v="final"></span></div>
+            </div>
+            <div class="letras" data-v="letras"></div>
+
+            <div style="height:14px"></div>
+            <div class="titulo">Observaciones</div>
+            <div style="padding-top:6px;line-height:1.4;font-size:12.5px;white-space:pre-line" data-v="obs"></div>
+            <div class="nota" style="padding-top:14px">* Precios y condiciones sujetos a disponibilidad y a la vigencia indicada. Imágenes referenciales.</div>
+          </div>
+          <div class="col-d plano">
+            <div class="mono" style="font-size:10px;font-weight:bold;color:var(--gris);padding-bottom:6px">Tipología <span data-v="tipo"></span></div>
+            <img id="planoImg" alt="Plano de la tipología">
+          </div>
+        </div>
       </div>
-      <form id="formulario" novalidate>
-        <label><span data-en="Name">Nombre</span>
-          <input name="nombre" autocomplete="name" required placeholder="Tu nombre" data-en-placeholder="Your name">
-        </label>
-        <label><span data-en="What are you interested in?">¿Qué te interesa?</span>
-          <select name="interes">
-            <option data-en="Early payment discount">Descuento por pago anticipado</option>
-            <option data-en="Living at La Vuelta">Vivir en La Vuelta</option>
-            <option data-en="Investing">Invertir</option>
-            <option data-en="A commercial space">Local comercial</option>
-            <option data-en="Just information">Solo quiero información</option>
-          </select>
-        </label>
-        <p class="error" id="error" role="alert"></p>
-        <button class="boton" type="submit"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg><span data-en="Send via WhatsApp">Enviar por WhatsApp</span></button>
-        <p class="aviso" data-en="WhatsApp will open with your message ready to send.">Se abrirá WhatsApp con tu mensaje listo para enviar.</p>
-      </form>
-    </div>
-  </section>
-</main>
+      <div class="pie">Un proyecto de Grupo León Vintimilla &nbsp;·&nbsp; con Construlein León Iñiguez &nbsp;·&nbsp; WhatsApp +593 98 334 7804 &nbsp;·&nbsp; www.edificiolavuelta.com</div>
+    </section>
 
-<footer>
-  <div class="envoltura">
-    <img class="logo" src="logo.png" alt="La Vuelta, de Puertas del Sol" width="1480" height="872" loading="lazy">
-    <p data-en="A project by Grupo León Vintimilla in partnership with Construlein León Iñiguez. Cuenca, Ecuador.">Un proyecto de Grupo León Vintimilla en alianza con Construlein León Iñiguez. Cuenca, Ecuador.</p>
-    <p><span data-en="Images for reference only.">Imágenes referenciales.</span> © <span id="anio"></span> edificiolavuelta.com</p>
+    <!-- ================= HOJA 2 ================= -->
+    <section class="hoja">
+      <div class="cuerpo">
+        <div class="mono" style="font-size:11px;font-weight:bold;color:var(--vino);text-align:center;padding-bottom:12px"><span class="ast">***</span> La Vuelta · de Puertas del Sol <span class="ast">***</span></div>
+        <div class="titulo">Tu departamento</div>
+        <div class="galeria dos" style="margin-top:8px">
+          <figure><img src="img/galeria/sala-comedor.jpg" alt=""><figcaption>Sala y comedor</figcaption></figure>
+          <figure><img src="img/galeria/sala-cocina.jpg" alt=""><figcaption>Sala, comedor y cocina</figcaption></figure>
+        </div>
+        <div style="height:12px"></div>
+        <div class="titulo">Amenities</div>
+        <div class="galeria" style="margin-top:8px">
+          <figure class="ancho"><img src="img/galeria/lobby.jpg" alt=""><figcaption>Lobby</figcaption></figure>
+          <figure><img src="img/galeria/coworking.jpg" alt=""><figcaption>Coworking</figcaption></figure>
+          <figure><img src="img/galeria/bar.jpg" alt=""><figcaption>Bar &amp; terraza</figcaption></figure>
+          <figure><img src="img/galeria/teppanyaki.jpg" alt=""><figcaption>Zona teppanyaki</figcaption></figure>
+          <figure><img src="img/galeria/plaza.jpg" alt=""><figcaption>Plaza comercial</figcaption></figure>
+          <figure><img src="img/galeria/ninos.jpg" alt=""><figcaption>Zona de niños</figcaption></figure>
+          <figure><img src="img/galeria/pet.jpg" alt=""><figcaption>Zona pet friendly</figcaption></figure>
+          <figure><img src="img/galeria/gimnasio.jpg" alt=""><figcaption>Gimnasio</figcaption></figure>
+        </div>
+        <div class="nota" style="text-align:center;padding-top:6px">* Imágenes referenciales.</div>
+      </div>
+      <div class="pie">Un proyecto de Grupo León Vintimilla &nbsp;·&nbsp; con Construlein León Iñiguez &nbsp;·&nbsp; WhatsApp +593 98 334 7804 &nbsp;·&nbsp; www.edificiolavuelta.com</div>
+    </section>
+
   </div>
-</footer>
+</div>
 
-<a class="flotante js-wa" href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.7-.8-2-.9-.3-.1-.5-.1-.7.1-.2.3-.8.9-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg></a>
+<div class="modal" id="modal" hidden>
+  <div class="modal-caja">
+    <p><b>El PDF está listo.</b></p>
+    <p class="paso">Primero abre el chat del cliente y envíale el saludo. Luego vuelve aquí y comparte el PDF: el cliente aparecerá primero en la lista.</p>
+    <button class="secundario" id="mChat" type="button">1. Abrir chat del cliente</button>
+    <button class="primario" id="mCompartir" type="button">2. Compartir PDF</button>
+    <button class="enlace" id="mCerrar" type="button">Cerrar</button>
+  </div>
+</div>
 
-<dialog id="visor" aria-label="Imagen ampliada">
-  <button class="cerrar" type="button" aria-label="Cerrar">×</button>
-  <img alt="">
-  <p></p>
-</dialog>
+<div class="acciones">
+  <button class="secundario" id="btnWa" type="button">Enviar por WhatsApp</button>
+  <button class="primario" id="btnPdf" type="button">Descargar PDF</button>
+</div>
 
 <script>
-  // Número de ventas: código de país + número, sin + ni espacios
-  const WHATSAPP = "593983347804";
-  const TXT = {
-    es: { msg: "Hola, quiero información sobre La Vuelta.",
-          desc: "Hola, quiero información sobre el *descuento especial por pago anticipado* en La Vuelta.",
-          form: (n, i) => "Hola, soy " + n + ". Me interesa La Vuelta: *" + i.toLowerCase() + "*. ¿Me pueden enviar información?",
-          err: "Escribe tu nombre para continuar.",
-          title: "La Vuelta, de Puertas del Sol — Tu siguiente oportunidad está a la vuelta",
-          toggle: "English version" },
-    en: { msg: "Hi, I'd like information about La Vuelta.",
-          desc: "Hi, I'd like information about the *special early payment discount* at La Vuelta.",
-          form: (n, i) => "Hi, I'm " + n + ". I'm interested in La Vuelta: *" + i.toLowerCase() + "*. Could you send me more information?",
-          err: "Please enter your name to continue.",
-          title: "La Vuelta, Puertas del Sol — Your next opportunity is just around the corner",
-          toggle: "Versión en español" }
+const $ = s => document.querySelector(s);
+const usd = n => "$" + Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct = n => (Math.round(n*10)/10) + "%";
+let UNIDADES = [];
+
+/* ---------- Números a letras ---------- */
+function letras(n){
+  const U=["","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve","veinte","veintiuno","veintidós","veintitrés","veinticuatro","veinticinco","veintiséis","veintisiete","veintiocho","veintinueve"];
+  const D=["","","","treinta","cuarenta","cincuenta","sesenta","setenta","ochenta","noventa"];
+  const C=["","ciento","doscientos","trescientos","cuatrocientos","quinientos","seiscientos","setecientos","ochocientos","novecientos"];
+  const menor1000 = x => {
+    if(x===0) return ""; if(x===100) return "cien";
+    const c=Math.floor(x/100), r=x%100; let s=C[c];
+    if(r){ s+=(s?" ":"") + (r<30 ? U[r] : D[Math.floor(r/10)] + (r%10 ? " y " + U[r%10] : "")); }
+    return s;
   };
-  let idioma = "es";
-  const wa = (t) => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
+  const ent=Math.floor(n), cts=Math.round((n-ent)*100);
+  const mill=Math.floor(ent/1e6), miles=Math.floor((ent%1e6)/1000), resto=ent%1000;
+  let s="";
+  if(mill) s+= mill===1 ? "un millón " : menor1000(mill).replace(/uno$/,"un")+" millones ";
+  if(miles) s+= miles===1 ? "mil " : menor1000(miles).replace(/uno$/,"un")+" mil ";
+  s+=menor1000(resto);
+  s=(s.trim()||"cero");
+  return s.charAt(0).toUpperCase()+s.slice(1)+" "+(cts<10?"0":"")+cts+"/100 dólares";
+}
 
-  function ponerIdioma(l) {
-    idioma = l;
-    document.documentElement.lang = l;
-    document.querySelectorAll("[data-en]").forEach(el => {
-      if (el.dataset.es === undefined) el.dataset.es = el.innerHTML;
-      el.innerHTML = l === "en" ? el.dataset.en : el.dataset.es;
-    });
-    document.querySelectorAll("[data-en-placeholder]").forEach(el => {
-      if (el.dataset.esPlaceholder === undefined) el.dataset.esPlaceholder = el.placeholder;
-      el.placeholder = l === "en" ? el.dataset.enPlaceholder : el.dataset.esPlaceholder;
-    });
-    document.title = TXT[l].title;
-    document.getElementById("idioma").setAttribute("aria-label", TXT[l].toggle);
-    document.querySelectorAll(".js-wa").forEach(a => a.href = wa(TXT[l].msg));
-    document.querySelectorAll(".js-wa-desc").forEach(a => a.href = wa(TXT[l].desc));
-    document.getElementById("error").textContent = "";
-    try { localStorage.setItem("idioma", l); } catch (e) {}
+/* ---------- CSV ---------- */
+function parseCSV(t){
+  const [h,...rs]=t.trim().split(/\r?\n/); const k=h.split(",");
+  return rs.map(r=>{const v=r.split(",");const o={};k.forEach((x,i)=>o[x]=v[i]);return o;});
+}
+
+/* ---------- Asesor guardado ---------- */
+const guardables=["aNombre","aCel","aCorreo"];
+try{ const g=JSON.parse(localStorage.getItem("lv-asesor")||"{}"); guardables.forEach(id=>{ if(g[id]) $("#"+id).value=g[id]; }); }catch(e){}
+function guardarAsesor(){ try{ const g={}; guardables.forEach(id=>g[id]=$("#"+id).value); localStorage.setItem("lv-asesor",JSON.stringify(g)); }catch(e){} }
+
+/* ---------- Datos que llegan desde el formulario de eventos ---------- */
+const qs=new URLSearchParams(location.search);
+[["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([p,id])=>{ if(qs.get(p)) $("#"+id).value=qs.get(p); });
+const fmtN=v=>v?Number(v).toLocaleString("en-US",{maximumFractionDigits:2}):"";
+let cuoEditado=false;
+if(qs.get("plan")==="p"){ $("#esquema").value="p"; $("#pEnt").value=qs.get("ent")??LV_CONFIG.entradaPct; $("#pAnt").value=fmtN(+qs.get("ant")||0);
+  $("#pN").value=qs.get("n")??LV_CONFIG.plazoMeses; $("#pCuo").value=fmtN(+qs.get("cuotas")||0); cuoEditado=true; }
+$("#pCuo").addEventListener("input",()=>{ cuoEditado=true; });
+["#pAnt","#pCuo"].forEach(s=>$(s).addEventListener("blur",e=>{ const v=parseFloat(e.target.value.replace(/[^\d.]/g,"")); e.target.value=isFinite(v)?fmtN(v):""; }));
+
+/* Enlace al visualizador conservando los datos del cliente */
+function enlaceDisp(){ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); $("#verDisp").href="explorar.html"+(p.toString()?"?"+p:""); }
+["cNombre","cCel","cCorreo","cCi"].forEach(id=>$("#"+id).addEventListener("input",enlaceDisp)); enlaceDisp();
+
+/* ---------- Selectores ---------- */
+function llenarUnidades(){
+  const piso=$("#piso").value;
+  $("#unidad").innerHTML=UNIDADES.filter(u=>u.piso===piso).map(u=>{
+    const disp=u.estado.toLowerCase()==="disponible";
+    return `<option value="${u.unidad}" ${disp?"":"disabled"}>${u.unidad} · Tipo ${u.tipologia} · ${u.dormitorios}D · ${usd(u.precio)}${disp?"":" · "+u.estado}</option>`;
+  }).join("");
+  const primera=[...$("#unidad").options].find(o=>!o.disabled); if(primera) $("#unidad").value=primera.value;
+}
+
+function actual(){ return UNIDADES.find(u=>u.unidad===$("#unidad").value); }
+
+function codigo(){
+  const d=new Date(), z=n=>String(n).padStart(2,"0");
+  return `LV-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`;
+}
+let COD=codigo();
+
+/* ---------- Render ---------- */
+function set(k,v){ document.querySelectorAll(`[data-v="${k}"]`).forEach(el=>el.textContent=v); }
+
+function render(){
+  const u=actual(); if(!u) return;
+  const precio=+u.precio;
+  const r2=n=>Math.round(n*100)/100;
+  const vInicial=r2(precio*0.05), vCons=r2(precio*0.25), vEntrega=r2(precio-vInicial-vCons);
+  const pers=$("#esquema").value==="p";
+  document.querySelectorAll(".bP").forEach(b=>b.hidden=!pers); $("#fpEst").hidden=pers; $("#fpP").hidden=!pers; $("#precioDesc").hidden=!pers;
+  const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+  if(pers && !cuoEditado) $("#pCuo").value=fmtN(Math.round(precio*LV_CONFIG.cuotasPct)/100);
+  const pl=lvPlan(precio,{entradaPct:nv($("#pEnt")),anticipado:nv($("#pAnt")),cuotas:nv($("#pN")),totalCuotas:nv($("#pCuo"))});
+  const vFinal=pers?pl.final:precio;
+
+  $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.area_total} m² (balcón ${u.area_balcon} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(precio)}</b>`;
+  $("#resumenPago").innerHTML = pers
+    ? `Entrada <b>${usd(pl.E)}</b> · Anticipado <b>${usd(pl.A)}</b> · ${pl.n} cuotas de <b>${usd(pl.c)}</b> · Contra entrega <b>${usd(pl.CE)}</b> · Descuento <b>${usd(pl.D)}</b> · Precio final <b>${usd(pl.final)}</b>`+pl.avisos.map(a=>`<br><span class="error">${a}</span>`).join("")
+    : `Entrada 5% <b>${usd(vInicial)}</b> · Construcción 25% <b>${usd(vCons)}</b> · Contra entrega 70% <b>${usd(vEntrega)}</b>`;
+
+  const hoy=new Date(), vence=new Date(hoy.getTime()+(+$("#vigencia").value||15)*864e5);
+  const f=d=>d.toLocaleDateString("es-EC",{day:"2-digit",month:"2-digit",year:"numeric"});
+  const o=v=>v&&v.trim()?v.trim():"-";
+  set("codigo",COD); set("fecha",f(hoy)); set("vence",f(vence));
+  ["aNombre","aCel","aCorreo","cNombre","cCel","cCorreo","cCi"].forEach(id=>set(id,o($("#"+id).value)));
+  set("unidad",u.unidad); set("piso",u.piso); set("area",`${(+u.area_total).toFixed(2)} m²`);
+  set("dorm",u.dormitorios); set("banos",u.banos); set("tipo",u.tipologia);
+  set("parq", +u.parqueo ? (u.parqueo + (+u.bodega ? " + bodega" : "")) : "No incluye");
+  const m2=v=>`${(+v).toFixed(2)} m²`;
+  set("aInt",m2(u.area_interna)); set("aBal",+u.area_balcon?m2(u.area_balcon):"No tiene"); set("aPb",+u.area_parqueo_bodega?m2(u.area_parqueo_bodega):"No incluye");
+  set("precio",usd(precio)); set("letras",letras(precio));
+  set("inicial",usd(vInicial)); set("construccion",usd(vCons)); set("entrega",usd(vEntrega));
+  set("pEntPct",pl.entradaPct); set("pE",usd(pl.E)); set("pA",usd(pl.A)); set("pCuoTxt",`${pl.n} cuotas de ${usd(pl.c)}`); set("pC",usd(pl.total));
+  set("pCE",usd(pl.CE)); set("pTasa",pl.tasa); set("pD",pl.D?"− "+usd(pl.D):usd(0)); set("final",usd(vFinal));
+  $("#rowAnt").hidden=!pl.A; $("#rowCuo").hidden=!pl.n;
+  set("obs",o($("#obs").value));
+  $("#planoImg").src=`img/planos/tipo-${u.tipologia}.jpg`;
+}
+
+/* ---------- Escala de la vista previa ---------- */
+function escalar(){
+  const w=$(".preview-wrap").clientWidth-32, s=Math.min(1,w/794), e=$("#escala");
+  e.style.transform=`scale(${s})`; e.style.height=(e.scrollHeight*s)+"px";
+}
+window.addEventListener("resize",escalar);
+
+/* ---------- Eventos ---------- */
+document.addEventListener("input",e=>{ if(guardables.includes(e.target.id)) guardarAsesor(); render(); });
+$("#piso").addEventListener("change",()=>{ llenarUnidades(); render(); });
+$("#unidad").addEventListener("change",render);
+const enlaceCalc=()=>{ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); p.set("unidad",$("#unidad").value);
+  if($("#esquema").value==="p"){ const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+    p.set("plan","p"); p.set("ent",nv($("#pEnt"))); p.set("ant",nv($("#pAnt"))); p.set("n",nv($("#pN"))); p.set("cuotas",nv($("#pCuo"))); }
+  $("#verCalc").href="calculadora.html?"+p; };
+document.addEventListener("input",()=>enlaceCalc()); document.addEventListener("change",()=>enlaceCalc());
+["cNombre","cCel","cCorreo","cCi"].forEach(id=>$("#"+id).addEventListener("input",enlaceCalc));
+$("#unidad").addEventListener("change",enlaceCalc); $("#piso").addEventListener("change",enlaceCalc);
+/* ---------- PDF real (2 hojas A4) para descargar o compartir ---------- */
+let PDF=null;                       // se invalida cada vez que cambia algo
+const invalidar=()=>{ PDF=null; };
+document.addEventListener("input",invalidar);
+document.addEventListener("change",invalidar);
+
+function cargarScript(src){
+  return new Promise((ok,err)=>{ const s=document.createElement("script"); s.src=src; s.onload=ok;
+    s.onerror=()=>err(new Error("No se pudo cargar "+src)); document.head.appendChild(s); });
+}
+async function librerias(){
+  if(!window.html2canvas) await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+  if(!window.jspdf) await cargarScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+}
+function nombreArchivo(){
+  const n=$("#cNombre").value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/\s+/).slice(0,2).join("_").replace(/[^\w]/g,"");
+  return `Cotizacion_LaVuelta_${$("#unidad").value}_${n||"cliente"}.pdf`;
+}
+async function generarPDF(){
+  if(PDF) return PDF;
+  await librerias();
+  const cont=document.createElement("div");
+  cont.style.cssText="position:fixed;left:-10000px;top:0;width:794px;";
+  document.querySelectorAll(".hoja").forEach(h=>{ const c=h.cloneNode(true);
+    c.style.height="1123px"; c.style.boxShadow="none"; c.style.margin="0"; cont.appendChild(c); });
+  document.body.appendChild(cont);
+  await Promise.all([...cont.querySelectorAll("img")].map(i=>i.complete&&i.naturalWidth?0:new Promise(r=>{i.onload=i.onerror=r;})));
+  try{
+    const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true});
+    const hojas=[...cont.children];
+    for(let k=0;k<hojas.length;k++){
+      const cv=await html2canvas(hojas[k],{scale:2,backgroundColor:"#faede1",logging:false});
+      if(k) pdf.addPage();
+      pdf.addImage(cv.toDataURL("image/jpeg",0.85),"JPEG",0,0,210,297);
+    }
+    PDF={blob:pdf.output("blob"),nombre:nombreArchivo()};
+    return PDF;
+  } finally { cont.remove(); }
+}
+function listoParaEnviar(){
+  if(!$("#cNombre").value.trim()){ $("#cNombre").focus(); alert("Escribe el nombre del cliente."); return false; }
+  return true;
+}
+async function ocupado(btn,texto,fn){
+  const t=btn.textContent; btn.disabled=true; btn.textContent=texto;
+  try{ await fn(); } catch(e){ console.error(e); alert("No se pudo generar el PDF. Revisa tu conexión e inténtalo de nuevo."); }
+  finally{ btn.disabled=false; btn.textContent=t; }
+}
+function descargar({blob,nombre}){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nombre;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+}
+function chatCliente(){
+  const cel=$("#cCel").value.replace(/\D/g,"").replace(/^0/,"593");
+  const u=actual();
+  const msg=`Hola ${$("#cNombre").value.trim().split(" ")[0]||""}, te comparto la cotización del departamento ${u.unidad} en La Vuelta.`;
+  window.open(cel.length>=11?`https://wa.me/${cel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,"_blank");
+}
+async function compartir(){
+  if(!PDF) await generarPDF();
+  const file=new File([PDF.blob],PDF.nombre,{type:"application/pdf"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:PDF.nombre});
+    return true;
   }
-  let inicial = "es";
-  try {
-    const g = localStorage.getItem("idioma");
-    if (g === "es" || g === "en") inicial = g;
-    else if ((navigator.language || "").toLowerCase().startsWith("en")) inicial = "en";
-  } catch (e) {}
-  const q = new URLSearchParams(location.search).get("lang");
-  if (q === "en" || q === "es") inicial = q;
-  ponerIdioma(inicial);
-  document.getElementById("idioma").addEventListener("click", () => ponerIdioma(idioma === "es" ? "en" : "es"));
-  document.getElementById("anio").textContent = new Date().getFullYear();
+  descargar(PDF); return true;   // computadoras sin menú de compartir: se descarga para adjuntarlo
+}
 
-  document.getElementById("formulario").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const f = e.target, nombre = f.nombre.value.trim(), err = document.getElementById("error");
-    if (!nombre) { err.textContent = TXT[idioma].err; f.nombre.focus(); return; }
-    err.textContent = "";
-    window.open(wa(TXT[idioma].form(nombre, f.interes.options[f.interes.selectedIndex].textContent)), "_blank");
+$("#btnPdf").addEventListener("click",e=>{
+  if(!listoParaEnviar()) return;
+  ocupado(e.currentTarget,"Preparando PDF…",async()=>{ descargar(await generarPDF()); });
+});
+
+$("#btnWa").addEventListener("click",e=>{
+  if(!listoParaEnviar()) return;
+  ocupado(e.currentTarget,"Preparando PDF…",async()=>{
+    await generarPDF();
+    $("#modal").hidden=false;                               // pasos: 1) abrir chat 2) compartir PDF
   });
-  const visor = document.getElementById("visor");
-  document.querySelectorAll(".pieza button").forEach(b => b.addEventListener("click", () => {
-    visor.querySelector("img").src = b.dataset.src;
-    visor.querySelector("img").alt = b.querySelector("img").alt;
-    visor.querySelector("p").textContent = b.closest("figure").querySelector("strong").textContent;
-    visor.showModal();
-  }));
-  visor.querySelector(".cerrar").addEventListener("click", () => visor.close());
-  visor.addEventListener("click", (e) => { if (e.target === visor) visor.close(); });
+});
+$("#mCompartir").addEventListener("click",async()=>{ $("#modal").hidden=true; try{ await compartir(); }catch(e){} });
+$("#mChat").addEventListener("click",()=>{ chatCliente(); });
+$("#mCerrar").addEventListener("click",()=>{ $("#modal").hidden=true; });
+
+/* ---------- Inicio ---------- */
+lvCargarUnidades().then(datos=>{
+  UNIDADES=datos;
+  const pisos=[...new Set(UNIDADES.map(u=>u.piso))];
+  $("#piso").innerHTML=pisos.map(p=>`<option value="${p}">Piso ${p}</option>`).join("");
+  const pedida=qs.get("unidad") && UNIDADES.find(u=>u.unidad===qs.get("unidad"));
+  if(pedida) $("#piso").value=pedida.piso;
+  llenarUnidades(); if(pedida) $("#unidad").value=pedida.unidad;
+  render(); escalar(); enlaceCalc();
+  document.querySelectorAll("img").forEach(i=>i.addEventListener("load",escalar));
+}).catch(()=>{ $("#resumenUnidad").innerHTML='<span class="error">No se pudo leer unidades.csv. Revisa que esté en la misma carpeta que esta página.</span>'; });
 </script>
 </body>
 </html>

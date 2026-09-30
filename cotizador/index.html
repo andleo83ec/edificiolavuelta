@@ -467,6 +467,22 @@ function nombreArchivo(){
   const n=$("#cNombre").value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/\s+/).slice(0,2).join("_").replace(/[^\w]/g,"");
   return `Cotizacion_LaVuelta_${$("#unidad").value}_${n||"cliente"}.pdf`;
 }
+
+/* Convierte una imagen en base64 para incrustarla (html2canvas en iPhone omite imágenes que no están incrustadas) */
+const CACHE_IMG={};
+async function aDataURL(src){
+  if(CACHE_IMG[src]) return CACHE_IMG[src];
+  const r=await fetch(src,{cache:"force-cache"});
+  if(!r.ok) throw new Error(src+" "+r.status);
+  const b=await r.blob();
+  const d=await new Promise((ok,err)=>{ const f=new FileReader(); f.onload=()=>ok(f.result); f.onerror=err; f.readAsDataURL(b); });
+  CACHE_IMG[src]=d; return d;
+}
+function esperarImagen(i){
+  if(i.complete && i.naturalWidth) return (i.decode?i.decode().catch(()=>{}):Promise.resolve());
+  return new Promise(r=>{ i.onload=()=>{ (i.decode?i.decode().catch(()=>{}):Promise.resolve()).then(r); }; i.onerror=r; });
+}
+
 async function generarPDF(){
   if(PDF) return PDF;
   await librerias();
@@ -475,12 +491,17 @@ async function generarPDF(){
   document.querySelectorAll(".hoja").forEach(h=>{ const c=h.cloneNode(true);
     c.style.height="1123px"; c.style.boxShadow="none"; c.style.margin="0"; cont.appendChild(c); });
   document.body.appendChild(cont);
-  await Promise.all([...cont.querySelectorAll("img")].map(i=>i.complete&&i.naturalWidth?0:new Promise(r=>{i.onload=i.onerror=r;})));
+  /* incrustar cada imagen como base64 antes de dibujar */
+  await Promise.all([...cont.querySelectorAll("img")].filter(i=>i.getAttribute("src")).map(async i=>{
+    const orig=i.src;
+    try{ i.src=await aDataURL(orig); await esperarImagen(i); }
+    catch(e){ console.warn("Imagen no disponible:",orig); i.style.visibility="hidden"; }
+  }));
   try{
     const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",compress:true});
     const hojas=[...cont.children];
     for(let k=0;k<hojas.length;k++){
-      const cv=await html2canvas(hojas[k],{scale:2,backgroundColor:"#faede1",logging:false});
+      const cv=await html2canvas(hojas[k],{scale:2,backgroundColor:"#faede1",logging:false,useCORS:true,imageTimeout:20000});
       if(k) pdf.addPage();
       pdf.addImage(cv.toDataURL("image/jpeg",0.85),"JPEG",0,0,210,297);
     }

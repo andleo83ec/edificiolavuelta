@@ -11,7 +11,18 @@ window.LV_CONFIG = {
 
   // Enlace CSV de la hoja de Google publicada (Archivo → Compartir → Publicar en la web → CSV).
   // Déjalo vacío ("") para usar el archivo unidades.csv del repositorio.
+  // Registro de cotizaciones (Apps Script de la hoja de Google). Vacío = no se registra.
+  registroURL: "",
+  registroToken: "",
+
   fuenteDatos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRvS3Oy4FC6IAgoR9jLFmdrYeaMxiQTkzLvh7OQs5cMLLgciJCgQj8riMWQn9iuBvsS_jiUmy0JmHTE/pub?gid=1476526299&single=true&output=csv"
+};
+
+/* Descuento comercial sobre el precio de lista: tipo "p" = porcentaje, "m" = monto en dólares */
+window.lvDescuento = function (precio, tipo, valor) {
+  let d = tipo === "p" ? precio * (valor || 0) / 100 : (valor || 0);
+  d = Math.round(Math.max(0, Math.min(d, precio)) * 100) / 100;
+  return { desc: d, neto: Math.round((precio - d) * 100) / 100, pct: precio ? d / precio * 100 : 0 };
 };
 
 /* ---------- Lectura de unidades (hoja de Google o unidades.csv) ---------- */

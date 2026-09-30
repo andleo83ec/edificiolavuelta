@@ -82,6 +82,11 @@ button:disabled{opacity:.6}
 .dato.final .l{color:var(--vino)}
 .dato.final .v{font-weight:bold;font-size:13.5px}
 [hidden]{display:none!important}
+.precio-com{background:#fff;border:1.5px solid #8c2628;border-top:0;padding:4px 10px}
+.precio-com>div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0}
+.precio-com>div+div{border-top:1px solid #e3cfc2}
+.precio-com .mono{font-size:8.5px;font-weight:bold;letter-spacing:1px;color:#6f5f5f}
+.precio-com b{font-size:13.5px;color:#8c2628}
 .precio-desc{background:#6b7a4f;color:#fff;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px}
 .precio-desc .mono{font-size:8.5px;font-weight:bold;letter-spacing:1px}
 .precio-desc b{font-size:15px}
@@ -112,7 +117,7 @@ button:disabled{opacity:.6}
 <body>
 
 <div class="panel">
-  <header><img src="img/logo.png" alt="La Vuelta"><h1>Cotizador</h1><span class="links"><a class="ver" id="verDisp" href="explorar.html">Ver disponibilidad →</a><a class="ver" id="verCalc" href="calculadora.html">Calculadora →</a></span></header>
+  <header><img src="img/logo.png" alt="La Vuelta"><h1>Cotizador</h1><span class="links"><a class="ver" id="verDisp" href="explorar.html">Ver disponibilidad →</a><a class="ver" id="verCalc" href="calculadora.html">Calculadora →</a><a class="ver" href="cuadro.html">Cuadro PDF →</a></span></header>
 
   <fieldset>
     <legend>Cliente</legend>
@@ -137,6 +142,7 @@ button:disabled{opacity:.6}
     <legend>Forma de pago</legend>
     <div class="grid">
       <div><label for="esquema">Esquema de pago</label><select id="esquema"><option value="estandar">Estándar 5% · 25% · 70%</option><option value="p">Plan personalizado</option></select></div>
+      <div><label for="dVal">Descuento al precio</label><div style="display:flex;gap:6px"><select id="dTipo" style="flex:0 0 72px"><option value="p">%</option><option value="m">$</option></select><input id="dVal" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div></div>
       <div class="bP" hidden><label for="pEnt">Entrada %</label><input id="pEnt" type="number" inputmode="decimal" min="0" max="100" step="0.5" value="5"></div>
       <div class="bP" hidden><label for="pAnt">Pago anticipado $</label><input id="pAnt" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></div>
       <div class="bP" hidden><label for="pN">N° de cuotas</label><input id="pN" type="number" inputmode="numeric" min="0" step="1" value="30"></div>
@@ -217,6 +223,10 @@ button:disabled{opacity:.6}
           <div class="col-d">
             <div class="titulo">Precio</div>
             <div class="precio"><div class="mono" style="font-size:10px;font-weight:bold">Valor inmueble</div><div class="sv" data-v="precio"></div></div>
+            <div class="precio-com" id="precioCom" hidden>
+              <div><span class="mono">Descuento (<span data-v="dPct"></span>%)</span><b data-v="dMonto"></b></div>
+              <div><span class="mono">Precio con descuento</span><b data-v="neto"></b></div>
+            </div>
             <div class="precio-desc" id="precioDesc" hidden><span class="mono">Con descuento por pronto pago</span><b data-v="final"></b></div>
           </div>
         </div>
@@ -235,7 +245,7 @@ button:disabled{opacity:.6}
               <div class="dato sep" id="rowAnt"><span class="l">Pago anticipado</span><span class="v" data-v="pA"></span></div>
               <div class="dato sep" id="rowCuo"><span class="l">Durante la construcción <span style="font-weight:normal">(<span data-v="pCuoTxt"></span>)</span></span><span class="v" data-v="pC"></span></div>
               <div class="dato sep"><span class="l">Contra entrega</span><span class="v" data-v="pCE"></span></div>
-              <div class="dato sep desc"><span class="l">Descuento por pronto pago (tasa <span data-v="pTasa"></span>% anual)</span><span class="v" data-v="pD"></span></div>
+              <div class="dato sep desc"><span class="l">Descuento por pronto pago</span><span class="v" data-v="pD"></span></div>
               <div class="dato sep final"><span class="l">Precio final con descuento</span><span class="v" data-v="final"></span></div>
             </div>
             <div class="letras" data-v="letras"></div>
@@ -341,6 +351,7 @@ const qs=new URLSearchParams(location.search);
 [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([p,id])=>{ if(qs.get(p)) $("#"+id).value=qs.get(p); });
 const fmtN=v=>v?Number(v).toLocaleString("en-US",{maximumFractionDigits:2}):"";
 let cuoEditado=false;
+if(qs.get("dv")){ $("#dTipo").value=qs.get("dt")==="m"?"m":"p"; $("#dVal").value=qs.get("dv"); }
 if(qs.get("plan")==="p"){ $("#esquema").value="p"; $("#pEnt").value=qs.get("ent")??LV_CONFIG.entradaPct; $("#pAnt").value=fmtN(+qs.get("ant")||0);
   $("#pN").value=qs.get("n")??LV_CONFIG.plazoMeses; $("#pCuo").value=fmtN(+qs.get("cuotas")||0); cuoEditado=true; }
 $("#pCuo").addEventListener("input",()=>{ cuoEditado=true; });
@@ -364,7 +375,7 @@ function actual(){ return UNIDADES.find(u=>u.unidad===$("#unidad").value); }
 
 function codigo(){
   const d=new Date(), z=n=>String(n).padStart(2,"0");
-  return `LV-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`;
+  return `LV-${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}${z(d.getSeconds())}`;
 }
 let COD=codigo();
 
@@ -373,7 +384,8 @@ function set(k,v){ document.querySelectorAll(`[data-v="${k}"]`).forEach(el=>el.t
 
 function render(){
   const u=actual(); if(!u) return;
-  const precio=+u.precio;
+  const nv0=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+  const lista=+u.precio, dc=lvDescuento(lista,$("#dTipo").value,nv0($("#dVal"))), precio=dc.neto;
   const r2=n=>Math.round(n*100)/100;
   const vInicial=r2(precio*0.05), vCons=r2(precio*0.25), vEntrega=r2(precio-vInicial-vCons);
   const pers=$("#esquema").value==="p";
@@ -383,7 +395,7 @@ function render(){
   const pl=lvPlan(precio,{entradaPct:nv($("#pEnt")),anticipado:nv($("#pAnt")),cuotas:nv($("#pN")),totalCuotas:nv($("#pCuo"))});
   const vFinal=pers?pl.final:precio;
 
-  $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.area_total} m² (balcón ${u.area_balcon} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(precio)}</b>`;
+  $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.area_total} m² (balcón ${u.area_balcon} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(lista)}</b>`+(dc.desc?` · Descuento ${usd(dc.desc)} (${dc.pct.toFixed(2)}%) → <b>${usd(precio)}</b>`:"");
   $("#resumenPago").innerHTML = pers
     ? `Entrada <b>${usd(pl.E)}</b> · Anticipado <b>${usd(pl.A)}</b> · ${pl.n} cuotas de <b>${usd(pl.c)}</b> · Contra entrega <b>${usd(pl.CE)}</b> · Descuento <b>${usd(pl.D)}</b> · Precio final <b>${usd(pl.final)}</b>`+pl.avisos.map(a=>`<br><span class="error">${a}</span>`).join("")
     : `Entrada 5% <b>${usd(vInicial)}</b> · Construcción 25% <b>${usd(vCons)}</b> · Contra entrega 70% <b>${usd(vEntrega)}</b>`;
@@ -398,14 +410,19 @@ function render(){
   set("parq", +u.parqueo ? (u.parqueo + (+u.bodega ? " + bodega" : "")) : "No incluye");
   const m2=v=>`${(+v).toFixed(2)} m²`;
   set("aInt",m2(u.area_interna)); set("aBal",+u.area_balcon?m2(u.area_balcon):"No tiene"); set("aPb",+u.area_parqueo_bodega?m2(u.area_parqueo_bodega):"No incluye");
-  set("precio",usd(precio)); set("letras",letras(precio));
+  set("precio",usd(lista)); set("letras",letras(vFinal));
+  $("#precioCom").hidden=!dc.desc; set("dPct",dc.pct.toFixed(2).replace(/\.00$/,"")); set("dMonto","− "+usd(dc.desc)); set("neto",usd(precio));
   set("inicial",usd(vInicial)); set("construccion",usd(vCons)); set("entrega",usd(vEntrega));
   set("pEntPct",pl.entradaPct); set("pE",usd(pl.E)); set("pA",usd(pl.A)); set("pCuoTxt",`${pl.n} cuotas de ${usd(pl.c)}`); set("pC",usd(pl.total));
   set("pCE",usd(pl.CE)); set("pTasa",pl.tasa); set("pD",pl.D?"− "+usd(pl.D):usd(0)); set("final",usd(vFinal));
   $("#rowAnt").hidden=!pl.A; $("#rowCuo").hidden=!pl.n;
   set("obs",o($("#obs").value));
   $("#planoImg").src=`img/planos/tipo-${u.tipologia}.jpg`;
+  ULT = pers
+    ? {unidad:u.unidad,piso:u.piso,tipologia:u.tipologia,lista,desc:dc.desc,neto:precio,esquema:"Personalizado",E:pl.E,A:pl.A,n:pl.n,c:pl.c,CE:pl.CE,D:pl.D,final:pl.final}
+    : {unidad:u.unidad,piso:u.piso,tipologia:u.tipologia,lista,desc:dc.desc,neto:precio,esquema:"Estándar 5-25-70",E:vInicial,A:0,n:LV_CONFIG.plazoMeses,c:r2(vCons/LV_CONFIG.plazoMeses),CE:vEntrega,D:0,final:precio};
 }
+let ULT=null, REG_FIRMA=null;
 
 /* ---------- Escala de la vista previa ---------- */
 function escalar(){
@@ -419,6 +436,7 @@ document.addEventListener("input",e=>{ if(guardables.includes(e.target.id)) guar
 $("#piso").addEventListener("change",()=>{ llenarUnidades(); render(); });
 $("#unidad").addEventListener("change",render);
 const enlaceCalc=()=>{ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); p.set("unidad",$("#unidad").value);
+  { const dv=$("#dVal").value.replace(/[^\d.]/g,""); if(+dv){ p.set("dt",$("#dTipo").value); p.set("dv",dv); } }
   if($("#esquema").value==="p"){ const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
     p.set("plan","p"); p.set("ent",nv($("#pEnt"))); p.set("ant",nv($("#pAnt"))); p.set("n",nv($("#pN"))); p.set("cuotas",nv($("#pCuo"))); }
   $("#verCalc").href="calculadora.html?"+p; };
@@ -493,15 +511,31 @@ async function compartir(){
   descargar(PDF); return true;   // computadoras sin menú de compartir: se descarga para adjuntarlo
 }
 
+/* ---------- Registro de cotizaciones en la hoja de Google ---------- */
+function firma(){ return JSON.stringify([ULT,["cNombre","cCi","cCel","cCorreo","obs"].map(id=>$("#"+id).value.trim())]); }
+function prepararCodigo(){                      // cotización distinta a la ya registrada = código nuevo
+  if(REG_FIRMA && REG_FIRMA!==firma()){ COD=codigo(); render(); invalidar(); }
+}
+function registrar(accion){
+  REG_FIRMA=firma();
+  const C=LV_CONFIG; if(!C.registroURL||!ULT) return;
+  const v=id=>$("#"+id).value.trim();
+  const datos={token:C.registroToken,codigo:COD,accion,asesor:v("aNombre"),cliente:v("cNombre"),cedula:v("cCi"),celular:v("cCel"),correo:v("cCorreo"),
+    observaciones:v("obs"),vigencia:+$("#vigencia").value||15,...ULT};
+  fetch(C.registroURL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(datos)}).catch(()=>{});
+}
+
 $("#btnPdf").addEventListener("click",e=>{
   if(!listoParaEnviar()) return;
-  ocupado(e.currentTarget,"Preparando PDF…",async()=>{ descargar(await generarPDF()); });
+  prepararCodigo();
+  ocupado(e.currentTarget,"Preparando PDF…",async()=>{ descargar(await generarPDF()); registrar("PDF"); });
 });
 
 $("#btnWa").addEventListener("click",e=>{
   if(!listoParaEnviar()) return;
+  prepararCodigo();
   ocupado(e.currentTarget,"Preparando PDF…",async()=>{
-    await generarPDF();
+    await generarPDF(); registrar("WhatsApp");
     $("#modal").hidden=false;                               // pasos: 1) abrir chat 2) compartir PDF
   });
 });

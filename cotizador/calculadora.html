@@ -114,9 +114,9 @@ button:focus-visible,.chip:focus-visible{outline:3px solid var(--azul);outline-o
 <script>
 const $=s=>document.querySelector(s);
 const CFG=window.LV_CONFIG;
-const usd=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-const num=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
-const fmt=v=>v?Number(v).toLocaleString("en-US",{maximumFractionDigits:2}):"";
+const usd=n=>lvUSD(n);
+const num=el=>lvNumero(el.value);
+const fmt=v=>lvFmtEntrada(v);
 const r2=x=>Math.round(x*100)/100;
 const qs=new URLSearchParams(location.search);
 let U=[], entEditada=false, cuoEditada=false, ultimo=null;
@@ -144,16 +144,16 @@ function calcular(){
   const dc=base(), neto=dc.neto;
   const p=lvPlan(neto,{entrada:num($("#entrada")),anticipado:num($("#anticipado")),cuotas:num($("#cuotas")),cuota:num($("#cuota"))});
   ultimo={p,dc};
-  $("#info").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.dormitorios} dorm. · ${(+u.area_total).toFixed(2)} m²`;
-  $("#ayEnt").textContent=`${p.entradaPct.toFixed(2)}% del precio`;
+  $("#info").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.dormitorios} dorm. · ${lvFmt(+u.area_total)} m²`;
+  $("#ayEnt").textContent=`${lvFmt(p.entradaPct)}% del precio`;
   $("#ayN").textContent=`máximo ${CFG.plazoMeses} (construcción)`;
-  $("#ayCuo").textContent=p.n?`total ${usd(p.total)} · ${(p.total/neto*100).toFixed(2)}%`:"sin cuotas";
+  $("#ayCuo").textContent=p.n?`total ${usd(p.total)} · ${lvFmt(p.total/neto*100)}%`:"sin cuotas";
   $("#bTasa").innerHTML=`<span>Pronto pago: compara con las condiciones iniciales (5% · 25% en cuotas · 70%). Suma lo que se paga antes y resta lo que se deja de pagar en la obra, al</span><b>${p.tasa}% anual</b>`;
   $("#avisos").innerHTML=p.avisos.map(a=>`<div class="aviso">${a}</div>`).join("");
   $("#rPrecio").textContent=usd(u.precio);
   $("#fCom").hidden=!dc.desc; $("#fNeto").hidden=!dc.desc;
-  $("#sCom").textContent=`${dc.pct.toFixed(2)}% del precio de lista`; $("#rCom").textContent="− "+usd(dc.desc); $("#rNeto").textContent=usd(neto);
-  $("#lEntrada").textContent=`Entrada (${p.entradaPct.toFixed(2).replace(/\.00$/,"")}%)`; $("#rEntrada").textContent=usd(p.E);
+  $("#sCom").textContent=`${lvFmt(dc.pct)}% del precio de lista`; $("#rCom").textContent="− "+usd(dc.desc); $("#rNeto").textContent=usd(neto);
+  $("#lEntrada").textContent=`Entrada (${lvFmt(p.entradaPct).replace(/,00$/,"")}%)`; $("#rEntrada").textContent=usd(p.E);
   $("#fAnt").hidden=!p.A; $("#rAnt").textContent=usd(p.A);
   $("#fCuo").hidden=!p.n; $("#sCuo").textContent=`${p.n} cuotas de ${usd(p.c)}`; $("#rCuo").textContent=usd(p.total);
   $("#sCE").textContent=`al mes ${p.plazo}`; $("#rCE").textContent=usd(p.CE);
@@ -165,11 +165,12 @@ function calcular(){
 
 $("#entrada").addEventListener("input",()=>{ entEditada=true; calcular(); });
 $("#cuota").addEventListener("input",()=>{ cuoEditada=true; calcular(); });
-["#anticipado","#dVal"].forEach(s=>$(s).addEventListener("input",calcular));
+$("#anticipado").addEventListener("input",calcular);
+$("#dVal").addEventListener("input",()=>{ entEditada=false; cuoEditada=false; calcular(); });
 $("#cuotas").addEventListener("input",calcular);
-$("#dTipo").addEventListener("change",calcular);
+$("#dTipo").addEventListener("change",()=>{ entEditada=false; cuoEditada=false; calcular(); });
 ["#entrada","#anticipado","#cuota"].forEach(s=>$(s).addEventListener("blur",e=>{ e.target.value=fmt(num(e.target)); }));
-$("#atajosDesc").addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b) return; $("#dTipo").value="p"; $("#dVal").value=+b.dataset.d?b.dataset.d:""; calcular(); });
+$("#atajosDesc").addEventListener("click",e=>{ const b=e.target.closest(".chip"); if(!b) return; entEditada=false; cuoEditada=false; $("#dTipo").value="p"; $("#dVal").value=+b.dataset.d?b.dataset.d:""; calcular(); });
 document.querySelectorAll(".atajos")[1].addEventListener("click",e=>{
   const b=e.target.closest(".chip"); if(!b) return;
   const a=b.dataset.a, n=Math.round(num($("#cuotas")));
@@ -181,8 +182,8 @@ document.querySelectorAll(".atajos")[1].addEventListener("click",e=>{
     $("#cuota").value=fmt(Math.floor((b.neto-pr.E-pr.A-pr.D)/nn*100)/100); cuoEditada=true; }
   calcular();
 });
-$("#piso").addEventListener("change",()=>{ llenarUnidades(); calcular(); });
-$("#unidad").addEventListener("change",calcular);
+$("#piso").addEventListener("change",()=>{ entEditada=false; cuoEditada=false; llenarUnidades(); calcular(); });
+$("#unidad").addEventListener("change",()=>{ entEditada=false; cuoEditada=false; calcular(); });
 $("#btnCot").addEventListener("click",()=>{
   const u=actual(); if(!u||!ultimo) return; const {p}=ultimo;
   const q=new URLSearchParams(); ["nombre","cel","correo","ci"].forEach(k=>{ if(qs.get(k)) q.set(k,qs.get(k)); });

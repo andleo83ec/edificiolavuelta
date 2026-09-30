@@ -310,7 +310,7 @@ button:disabled{opacity:.6}
 
 <script>
 const $ = s => document.querySelector(s);
-const usd = n => "$" + Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const usd = n => lvUSD(n);
 const pct = n => (Math.round(n*10)/10) + "%";
 let UNIDADES = [];
 
@@ -349,7 +349,7 @@ function guardarAsesor(){ try{ const g={}; guardables.forEach(id=>g[id]=$("#"+id
 /* ---------- Datos que llegan desde el formulario de eventos ---------- */
 const qs=new URLSearchParams(location.search);
 [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([p,id])=>{ if(qs.get(p)) $("#"+id).value=qs.get(p); });
-const fmtN=v=>v?Number(v).toLocaleString("en-US",{maximumFractionDigits:2}):"";
+const fmtN=v=>lvFmtEntrada(v);
 let cuoEditado=false, entEditado=false;
 if(qs.get("dv")){ $("#dTipo").value=qs.get("dt")==="m"?"m":"p"; $("#dVal").value=qs.get("dv"); }
 if(qs.get("plan")==="p"){ $("#esquema").value="p"; $("#pAnt").value=fmtN(+qs.get("ant")||0); $("#pN").value=qs.get("n")??LV_CONFIG.plazoMeses;
@@ -357,7 +357,8 @@ if(qs.get("plan")==="p"){ $("#esquema").value="p"; $("#pAnt").value=fmtN(+qs.get
   if(qs.get("c")){ $("#pCuo").value=fmtN(+qs.get("c")); cuoEditado=true; } }
 $("#pCuo").addEventListener("input",()=>{ cuoEditado=true; });
 $("#pEnt").addEventListener("input",()=>{ entEditado=true; });
-["#pAnt","#pCuo","#pEnt"].forEach(s=>$(s).addEventListener("blur",e=>{ const v=parseFloat(e.target.value.replace(/[^\d.]/g,"")); e.target.value=isFinite(v)?fmtN(v):""; }));
+["#dVal","#dTipo","#unidad","#piso"].forEach(s=>$(s).addEventListener(s==="#dVal"?"input":"change",()=>{ entEditado=false; cuoEditado=false; },true));
+["#pAnt","#pCuo","#pEnt"].forEach(s=>$(s).addEventListener("blur",e=>{ const v=lvNumero(e.target.value); e.target.value=isFinite(v)?fmtN(v):""; }));
 
 /* Enlace al visualizador conservando los datos del cliente */
 function enlaceDisp(){ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); $("#verDisp").href="explorar.html"+(p.toString()?"?"+p:""); }
@@ -386,20 +387,20 @@ function set(k,v){ document.querySelectorAll(`[data-v="${k}"]`).forEach(el=>el.t
 
 function render(){
   const u=actual(); if(!u) return;
-  const nv0=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+  const nv0=el=>{ const v=lvNumero(el.value); return isFinite(v)?v:0; };
   const lista=+u.precio, dc=lvDescuento(lista,$("#dTipo").value,nv0($("#dVal"))), precio=dc.neto;
   const r2=n=>Math.round(n*100)/100;
   const vInicial=r2(precio*0.05), vCons=r2(precio*0.25), vEntrega=r2(precio-vInicial-vCons);
   const pers=$("#esquema").value==="p";
   document.querySelectorAll(".bP").forEach(b=>b.hidden=!pers); $("#fpEst").hidden=pers; $("#fpP").hidden=!pers;
-  const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+  const nv=el=>{ const v=lvNumero(el.value); return isFinite(v)?v:0; };
   if(!entEditado) $("#pEnt").value=fmtN(r2(precio*LV_CONFIG.entradaPct/100));
   { const nn=Math.round(nv($("#pN"))); if(!cuoEditado) $("#pCuo").value=nn?fmtN(r2(precio*LV_CONFIG.cuotasPct/100/nn)):""; }
   const pl=lvPlan(precio,{entrada:nv($("#pEnt")),anticipado:nv($("#pAnt")),cuotas:nv($("#pN")),cuota:nv($("#pCuo"))});
-  $("#pEntPctTxt").textContent=`(${pl.entradaPct.toFixed(2)}%)`; $("#pCuoTot").textContent=pl.n?`(total ${usd(pl.total)})`:"";
+  $("#pEntPctTxt").textContent=`(${lvFmt(pl.entradaPct)}%)`; $("#pCuoTot").textContent=pl.n?`(total ${usd(pl.total)})`:"";
   const vFinal=pers?pl.final:precio;
 
-  $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${u.area_total} m² (balcón ${u.area_balcon} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(lista)}</b>`+(dc.desc?` · Descuento ${usd(dc.desc)} (${dc.pct.toFixed(2)}%) → <b>${usd(precio)}</b>`:"");
+  $("#resumenUnidad").innerHTML=`<b>Dpt ${u.unidad}</b> · Piso ${u.piso} · Tipología ${u.tipologia} · ${lvFmt(+u.area_total)} m² (balcón ${lvFmt(+u.area_balcon)} m²) · ${u.dormitorios} dorm. · ${u.banos} baños · <b>${usd(lista)}</b>`+(dc.desc?` · Descuento ${usd(dc.desc)} (${lvFmt(dc.pct)}%) → <b>${usd(precio)}</b>`:"");
   $("#resumenPago").innerHTML = pers
     ? `Entrada <b>${usd(pl.E)}</b> · Anticipado <b>${usd(pl.A)}</b> · ${pl.n} cuotas de <b>${usd(pl.c)}</b> · Contra entrega <b>${usd(pl.CE)}</b> · Descuento <b>${usd(pl.D)}</b> · Precio final <b>${usd(pl.final)}</b>`+pl.avisos.map(a=>`<br><span class="error">${a}</span>`).join("")
     : `Entrada 5% <b>${usd(vInicial)}</b> · Construcción 25% <b>${usd(vCons)}</b> · Contra entrega 70% <b>${usd(vEntrega)}</b>`;
@@ -409,15 +410,15 @@ function render(){
   const o=v=>v&&v.trim()?v.trim():"-";
   set("codigo",COD); set("fecha",f(hoy)); set("vence",f(vence));
   ["aNombre","aCel","aCorreo","cNombre","cCel","cCorreo","cCi"].forEach(id=>set(id,o($("#"+id).value)));
-  set("unidad",u.unidad); set("piso",u.piso); set("area",`${(+u.area_total).toFixed(2)} m²`);
+  set("unidad",u.unidad); set("piso",u.piso); set("area",`${lvFmt(+u.area_total)} m²`);
   set("dorm",u.dormitorios); set("banos",u.banos); set("tipo",u.tipologia);
   set("parq", +u.parqueo ? (u.parqueo + (+u.bodega ? " + bodega" : "")) : "No incluye");
-  const m2=v=>`${(+v).toFixed(2)} m²`;
+  const m2=v=>`${lvFmt(+v)} m²`;
   set("aInt",m2(u.area_interna)); set("aBal",+u.area_balcon?m2(u.area_balcon):"No tiene"); set("aPb",+u.area_parqueo_bodega?m2(u.area_parqueo_bodega):"No incluye");
   set("precio",usd(lista)); set("letras",letras(vFinal));
-  $("#precioCom").hidden=!dc.desc; set("dPct",dc.pct.toFixed(2).replace(/\.00$/,"")); set("dMonto","− "+usd(dc.desc)); set("neto",usd(precio));
+  $("#precioCom").hidden=!dc.desc; set("dPct",lvFmt(dc.pct).replace(/,00$/,"")); set("dMonto","− "+usd(dc.desc)); set("neto",usd(precio));
   set("inicial",usd(vInicial)); set("construccion",usd(vCons)); set("entrega",usd(vEntrega));
-  set("pEntPct",pl.entradaPct.toFixed(2).replace(/\.00$/,"")); set("pE",usd(pl.E)); set("pA",usd(pl.A)); set("pCuoTxt",`${pl.n} cuotas de ${usd(pl.c)}`); set("pC",usd(pl.total));
+  set("pEntPct",lvFmt(pl.entradaPct).replace(/,00$/,"")); set("pE",usd(pl.E)); set("pA",usd(pl.A)); set("pCuoTxt",`${pl.n} cuotas de ${usd(pl.c)}`); set("pC",usd(pl.total));
   set("pCE",usd(pl.CE)); set("pTasa",pl.tasa); set("pD",pl.D?"− "+usd(pl.D):usd(0)); set("final",usd(vFinal));
   $("#rowAnt").hidden=!pl.A; $("#rowCuo").hidden=!pl.n;
   $("#rowPP").hidden=!pl.D; $("#rowFinal").hidden=!pl.D; $("#precioDesc").hidden=!(pers&&pl.D);
@@ -441,8 +442,8 @@ document.addEventListener("input",e=>{ if(guardables.includes(e.target.id)) guar
 $("#piso").addEventListener("change",()=>{ llenarUnidades(); render(); });
 $("#unidad").addEventListener("change",render);
 const enlaceCalc=()=>{ const p=new URLSearchParams(); [["nombre","cNombre"],["cel","cCel"],["correo","cCorreo"],["ci","cCi"]].forEach(([k,id])=>{ const v=$("#"+id).value.trim(); if(v) p.set(k,v); }); p.set("unidad",$("#unidad").value);
-  { const dv=$("#dVal").value.replace(/[^\d.]/g,""); if(+dv){ p.set("dt",$("#dTipo").value); p.set("dv",dv); } }
-  if($("#esquema").value==="p"){ const nv=el=>{ const v=parseFloat(String(el.value).replace(/[^\d.]/g,"")); return isFinite(v)?v:0; };
+  { const dv=String(lvNumero($("#dVal").value)); if(+dv){ p.set("dt",$("#dTipo").value); p.set("dv",dv); } }
+  if($("#esquema").value==="p"){ const nv=el=>{ const v=lvNumero(el.value); return isFinite(v)?v:0; };
     p.set("plan","p"); p.set("e",nv($("#pEnt"))); p.set("ant",nv($("#pAnt"))); p.set("n",nv($("#pN"))); p.set("c",nv($("#pCuo"))); }
   $("#verCalc").href="calculadora.html?"+p; };
 document.addEventListener("input",()=>enlaceCalc()); document.addEventListener("change",()=>enlaceCalc());

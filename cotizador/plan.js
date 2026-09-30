@@ -12,6 +12,8 @@ window.LV_CONFIG = {
   // Enlace CSV de la hoja de Google publicada (Archivo → Compartir → Publicar en la web → CSV).
   // Déjalo vacío ("") para usar el archivo unidades.csv del repositorio.
   // Registro de cotizaciones (Apps Script de la hoja de Google). Vacío = no se registra.
+  prontoPagoMinimo: 100, // descuentos por pronto pago menores a este monto no se aplican (redondeos)
+
   registroURL: "",
   registroToken: "",
 
@@ -27,11 +29,20 @@ window.lvDescuento = function (precio, tipo, valor) {
 
 /* ---------- Lectura de unidades (hoja de Google o unidades.csv) ---------- */
 function lvNumero(v){
-  let s=String(v??"").replace(/[^\d,.\-]/g,"");
+  let s=String(v??"").trim().replace(/[^\d,.\-]/g,"");
   if(s.includes(",")&&s.includes(".")) s = s.lastIndexOf(",")>s.lastIndexOf(".") ? s.replace(/\./g,"").replace(",",".") : s.replace(/,/g,"");
-  else if(s.includes(",")) s = /,\d{1,2}$/.test(s) ? s.replace(",",".") : s.replace(/,/g,"");
+  else if(s.includes(",")) s = /,\d{1,2}$/.test(s) ? s.replace(/\.(?=.*,)/g,"").replace(",",".") : s.replace(/,/g,"");
+  else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g,"");   // 121.500 = ciento veintiún mil quinientos
   const n=parseFloat(s); return isFinite(n)?n:0;
 }
+/* Formato ecuatoriano: punto para miles y coma para decimales */
+window.lvFmt = function(n, dec=2){
+  const neg=n<0, [e,d]=Math.abs(Number(n)||0).toFixed(dec).split(".");
+  return (neg?"-":"")+e.replace(/\B(?=(\d{3})+(?!\d))/g,".")+(dec?","+d:"");
+};
+window.lvUSD = (n, dec=2) => "$"+lvFmt(n,dec);
+window.lvFmtEntrada = v => { const x=Math.round((+v||0)*100)/100; return x? lvFmt(x, Number.isInteger(x)?0:2) : ""; };
+window.lvNumero = lvNumero;
 function lvParseCSV(texto){
   const filas=[]; let fila=[], campo="", q=false;
   for(let i=0;i<texto.length;i++){
@@ -105,6 +116,7 @@ window.lvPlan = function (precio, o) {
     c = n ? Math.max(0, Math.floor((precio - E - A) / n * 100) / 100) : 0;
     avisos.push("Con estos pagos el departamento queda pagado en la construcción; se ajustó la cuota.");
   }
+  if (D > 0 && D < (C.prontoPagoMinimo || 0)) D = 0;              // diferencias de redondeo
   if (D < -50) avisos.push("Este plan paga menos que las condiciones iniciales durante la obra: no aplica descuento por pronto pago.");
   D = r2(Math.max(0, D));
   const total = r2(c * n);

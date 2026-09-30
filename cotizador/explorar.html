@@ -123,9 +123,9 @@ button:focus-visible,.chip:focus-visible,summary:focus-visible{outline:3px solid
 
 <script>
 const $=s=>document.querySelector(s);
-const usd=n=>"$"+Math.round(n).toLocaleString("en-US");
-const usd2=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
-const m2=v=>(+v).toFixed(2)+" m²";
+const usd=n=>lvUSD(n,0);
+const usd2=n=>lvUSD(n);
+const m2=v=>lvFmt(+v)+" m²";
 const qs=new URLSearchParams(location.search);
 let U=[], F={dorm:"",piso:"",banos:"",balcon:"",parq:"",disp:true,orden:"precio",precio:0};
 const abiertos=new Set();

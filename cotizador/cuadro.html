@@ -83,7 +83,7 @@ tfoot th{background:var(--celeste);color:#fff;font-family:var(--mono);font-size:
 
 <script>
 const $=s=>document.querySelector(s);
-const k=n=>"$"+Math.round(n).toLocaleString("en-US");
+const k=n=>lvUSD(n,0);
 const hoy=new Date(), fecha=hoy.toLocaleDateString("es-EC",{day:"2-digit",month:"2-digit",year:"numeric"});
 
 function pintar(U){
@@ -94,7 +94,7 @@ function pintar(U){
   const disp=u=>u&&u.estado==="Disponible";
   const filas=tipos.map(t=>{
     const b=pisos.map(p=>by[t+"-"+p]).find(Boolean);
-    const info=`${b.dormitorios}D · ${b.banos}B · ${(+b.area_interna).toFixed(2)} m²${+b.parqueo?"":" · s/parq."}`;
+    const info=`${b.dormitorios}D · ${b.banos}B · ${lvFmt(+b.area_interna)} m²${+b.parqueo?"":" · s/parq."}`;
     const celdas=pisos.map(p=>{ const u=by[t+"-"+p]; return u?`<td class="${cls(u)}"><b>${u.unidad}</b><span>${k(u.precio)}</span></td>`:"<td></td>"; }).join("");
     return `<tr><th class="tip"><b>${t}</b><span>${info}</span></th>${celdas}<td class="cnt">${pisos.filter(p=>disp(by[t+"-"+p])).length}</td></tr>`;
   }).join("");

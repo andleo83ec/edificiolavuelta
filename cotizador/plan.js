@@ -67,32 +67,46 @@ window.lvCargarUnidades = async function(){
 
 /* Plan personalizado.
    - Entrada, pago anticipado, número y valor de cuotas los decide el asesor (se pueden redondear).
-   - El contra entrega es el saldo: cambiar entrada o cuotas NO cambia el precio final.
-   - Solo el pago anticipado genera descuento por pronto pago: los intereses que el proyecto
-     ahorra al recibir ese dinero al firmar en vez de en la entrega, a la tasa fijada. */
+   - El descuento por pronto pago compara el plan del cliente con las condiciones iniciales
+     (5% entrada · 25% en cuotas durante la obra · 70% contra entrega) a la tasa fijada:
+       · lo que pague antes que el plan estándar (anticipo, más cuotas, más entrada) suma descuento;
+       · lo que deje de pagar en la obra (menos o ninguna cuota) resta descuento.
+     Si el resultado es negativo no hay descuento (no se cobra recargo).
+   - El descuento se aplica en el pago contra entrega; el contra entrega es el saldo. */
 window.lvPlan = function (precio, o) {
   const C = window.LV_CONFIG, T = C.plazoMeses;
   const tasa = o.tasa ?? C.tasaAnual, r = tasa / 100 / 12;
   const r2 = x => Math.round(x * 100) / 100;
-  const factor = Math.pow(1 + r, T) - 1;                       // interés de T meses sobre $1
+  const f = n => Math.pow(1 + r, -n);
+  const a = n => n > 0 ? (r ? (1 - f(n)) / r : n) : 0;
   const avisos = [];
+
+  // Condiciones iniciales (referencia)
+  const E0 = precio * C.entradaPct / 100, C0 = precio * C.cuotasPct / 100;
+  const vpStd = E0 + (C0 / T) * a(T) + (precio - E0 - C0) * f(T);
 
   let E = o.entrada != null ? r2(o.entrada) : r2(precio * (o.entradaPct ?? C.entradaPct) / 100);
   E = Math.min(Math.max(0, E), precio);
   let A = Math.max(0, r2(o.anticipado || 0));
   const n = Math.max(0, Math.min(T, Math.round(o.cuotas ?? T)));
-  let c = n ? Math.max(0, r2(o.cuota != null ? o.cuota : precio * C.cuotasPct / 100 / n)) : 0;
-  const desc = a => o.sinPronto ? 0 : r2(a * factor);
+  let c = n ? Math.max(0, r2(o.cuota != null ? o.cuota : C0 / n)) : 0;
 
-  let D = desc(A);
-  if (E + A + D > precio) {                                     // el anticipo cubre todo
-    A = r2((precio - E) / (1 + (o.sinPronto ? 0 : factor))); D = desc(A); c = 0;
-    avisos.push("El pago anticipado cubre todo el departamento; se ajustó al máximo.");
-  }
-  if (E + A + c * n + D > precio + 0.005) {                      // las cuotas superan el saldo
-    c = n ? Math.max(0, Math.floor((precio - E - A - D) / n * 100) / 100) : 0;
+  // Descuento (en la entrega) que deja al proyecto igual que con el plan estándar
+  const dNeutro = () => (E + A + c * a(n) + (precio - E - A - c * n) * f(T) - vpStd) / f(T);
+  let D = o.sinPronto ? 0 : dNeutro();
+
+  if (!o.sinPronto && precio - E - A - c * n - D < 0) {       // pagos durante la obra cubren todo
+    if (E + A >= vpStd) { A = r2(Math.max(0, vpStd - E)); c = 0;
+      avisos.push("El pago anticipado cubre todo el departamento; se ajustó al máximo."); }
+    else { c = n ? Math.floor((vpStd - E - A) / a(n) * 100) / 100 : 0;
+      avisos.push("Con estos pagos el departamento queda pagado en la construcción; se ajustó la cuota."); }
+    D = dNeutro();
+  } else if (o.sinPronto && E + A + c * n > precio) {
+    c = n ? Math.max(0, Math.floor((precio - E - A) / n * 100) / 100) : 0;
     avisos.push("Con estos pagos el departamento queda pagado en la construcción; se ajustó la cuota.");
   }
+  if (D < -50) avisos.push("Este plan paga menos que las condiciones iniciales durante la obra: no aplica descuento por pronto pago.");
+  D = r2(Math.max(0, D));
   const total = r2(c * n);
   const CE = r2(Math.max(0, precio - E - A - total - D));
   return { precio, E, entradaPct: precio ? E / precio * 100 : 0, A, n, c, total, CE, D,

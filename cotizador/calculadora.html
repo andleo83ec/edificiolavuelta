@@ -148,7 +148,7 @@ function calcular(){
   $("#ayEnt").textContent=`${p.entradaPct.toFixed(2)}% del precio`;
   $("#ayN").textContent=`máximo ${CFG.plazoMeses} (construcción)`;
   $("#ayCuo").textContent=p.n?`total ${usd(p.total)} · ${(p.total/neto*100).toFixed(2)}%`:"sin cuotas";
-  $("#bTasa").innerHTML=`<span>El descuento al precio es directo. Solo el pago anticipado genera descuento por pronto pago, calculado al</span><b>${p.tasa}% anual</b>`;
+  $("#bTasa").innerHTML=`<span>Pronto pago: compara con las condiciones iniciales (5% · 25% en cuotas · 70%). Suma lo que se paga antes y resta lo que se deja de pagar en la obra, al</span><b>${p.tasa}% anual</b>`;
   $("#avisos").innerHTML=p.avisos.map(a=>`<div class="aviso">${a}</div>`).join("");
   $("#rPrecio").textContent=usd(u.precio);
   $("#fCom").hidden=!dc.desc; $("#fNeto").hidden=!dc.desc;
@@ -157,9 +157,10 @@ function calcular(){
   $("#fAnt").hidden=!p.A; $("#rAnt").textContent=usd(p.A);
   $("#fCuo").hidden=!p.n; $("#sCuo").textContent=`${p.n} cuotas de ${usd(p.c)}`; $("#rCuo").textContent=usd(p.total);
   $("#sCE").textContent=`al mes ${p.plazo}`; $("#rCE").textContent=usd(p.CE);
-  $("#fPP").hidden=!p.D; $("#sDesc").textContent=`por el pago anticipado`; $("#rDesc").textContent="− "+usd(p.D);
+  $("#fPP").hidden=!p.D; $("#sDesc").textContent=`frente a las condiciones iniciales`; $("#rDesc").textContent="− "+usd(p.D);
   $("#rFinal").textContent=usd(p.final);
-  $("#comp").innerHTML=`Cambiar la entrada o las cuotas solo mueve el saldo contra entrega; el precio final no cambia. El precio final solo baja con el descuento al precio y con el pronto pago.`;
+  const s=lvPlan(neto,{});
+  $("#comp").innerHTML=`<b>Condiciones iniciales:</b> entrada ${usd(s.E)} · ${s.n} cuotas de ${usd(s.c)} · contra entrega ${usd(s.CE)}.<br>El descuento al precio es directo, sin tasa. El pronto pago se aplica al contra entrega.`;
 }
 
 $("#entrada").addEventListener("input",()=>{ entEditada=true; calcular(); });

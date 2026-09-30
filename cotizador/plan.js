@@ -14,8 +14,8 @@ window.LV_CONFIG = {
   // Registro de cotizaciones (Apps Script de la hoja de Google). Vacío = no se registra.
   prontoPagoMinimo: 100, // descuentos por pronto pago menores a este monto no se aplican (redondeos)
 
-  registroURL: "",
-  registroToken: "",
+  registroURL: "https://script.google.com/macros/s/AKfycbx2OiTIB-38cLlAY8eXKLqG7Q6KZLs2Rbl-9qm9O3rv-gj1mT1dW7GAHEkN-l1mfpPS/exec",
+  registroToken: "123",
 
   fuenteDatos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRvS3Oy4FC6IAgoR9jLFmdrYeaMxiQTkzLvh7OQs5cMLLgciJCgQj8riMWQn9iuBvsS_jiUmy0JmHTE/pub?gid=1476526299&single=true&output=csv"
 };

@@ -10,7 +10,7 @@ window.LV_CONFIG = {
 
   // Enlace CSV de la hoja de Google publicada (Archivo → Compartir → Publicar en la web → CSV).
   // Déjalo vacío ("") para usar el archivo unidades.csv del repositorio.
-  fuenteDatos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRvS3Oy4FC6IAgoR9jLFmdrYeaMxiQTkzLvh7OQs5cMLLgciJCgQj8riMWQn9iuBvsS_jiUmy0JmHTE/pubhtml?gid=1476526299&single=true"
+  fuenteDatos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRvS3Oy4FC6IAgoR9jLFmdrYeaMxiQTkzLvh7OQs5cMLLgciJCgQj8riMWQn9iuBvsS_jiUmy0JmHTE/pub?gid=1476526299&single=true&output=csv"
 };
 
 /* ---------- Lectura de unidades (hoja de Google o unidades.csv) ---------- */
